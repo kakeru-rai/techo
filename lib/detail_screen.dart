@@ -31,7 +31,7 @@ class _DetailScreenState extends State<DetailScreen> {
     widget.ticket.title = _titleController.text;
     widget.ticket.body = _bodyController.text;
 
-    TicketRepository().put(widget.ticket);
+    TicketRepository().upsert(widget.ticket);
   }
 
   void _onBodyChanged(String text) {

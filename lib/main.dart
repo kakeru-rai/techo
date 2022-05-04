@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'my_app.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
-import 'domain/ticket.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'gen/firebase_options_dev.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  await Hive.initFlutter();
-  Hive.registerAdapter(TicketAdapter());
+  print("main");
 
   runApp(const MyApp());
 }

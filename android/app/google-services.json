@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "57676602117",
+    "project_id": "techo-dev-c2560",
+    "storage_bucket": "techo-dev-c2560.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57676602117:android:5889407dab2fb6abfb756c",
+        "android_client_info": {
+          "package_name": "com.example.techo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "57676602117-1c4p4nrh8vcmo2un5m0vqfagab3483pr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBqBqvWVYoC7lEIXhoQ90uKzSXJYEVj96E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "57676602117-1c4p4nrh8vcmo2un5m0vqfagab3483pr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "57676602117-ek886ktqvhgu1parf0vlca3761vqp11q.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.techo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
