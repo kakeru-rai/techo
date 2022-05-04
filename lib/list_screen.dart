@@ -28,7 +28,7 @@ class _ListScreenState extends State<ListScreen> {
   void _add() {
     setState(() {
       _counter += 1;
-      items.add(Ticket("item $_counter", ""));
+      items.add(Ticket("", "item $_counter", ""));
 
       for (var element in items) {
         print(element.title + element.body);
@@ -49,13 +49,16 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _delete(Ticket ticket) async {
+    print("list delete");
     await TicketRepository().delete(ticket);
     await _initList();
     setState(() {});
   }
 
   Future<void> _initList() async {
-    TicketRepository().getList().then((list) => {items = list});
+    print("_initList");
+    items =
+        await TicketRepository().getList(); // .then((list) => {items = list});
     return Future<void>.value();
   }
 
