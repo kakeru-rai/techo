@@ -74,25 +74,25 @@ class _ListScreenState extends State<ListScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
+      body: ListView.separated(
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return OutlinedButton(
+          return ListTile(
+            onTap: () {
+              _navigateDetail(context, index);
+            },
+            title: Text(items[index].title),
+            subtitle: Text(items[index].body),
+            trailing: OutlinedButton(
               onPressed: () {
-                _navigateDetail(context, index);
+                _delete(items[index]);
               },
-              child: Row(children: [
-                Column(children: [
-                  Text(items[index].title),
-                  Text(items[index].body)
-                ]),
-                OutlinedButton(
-                  onPressed: () {
-                    _delete(items[index]);
-                  },
-                  child: const Text("X"),
-                ),
-              ]));
+              child: const Text("X"),
+            ),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return const Divider();
         },
       ),
       floatingActionButton: FloatingActionButton(

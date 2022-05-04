@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'domain/ticket.dart';
 
 class DetailScreen extends StatefulWidget {
-  const DetailScreen({Key? key, required this.ticket}) : super(key: key);
+  DetailScreen({Key? key, required this.ticket}) : super(key: key);
   final Ticket ticket;
+  String markdown = "hoge";
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -16,6 +18,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
+  String markdown = "hoge";
 
   @override
   void initState() {
@@ -31,6 +34,12 @@ class _DetailScreenState extends State<DetailScreen> {
     TicketRepository().put(widget.ticket);
   }
 
+  void _onBodyChanged(String text) {
+    setState(() {
+      markdown = text;
+    });
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -41,7 +50,8 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(widget.ticket.title)),
-      body: Column(
+      body: SingleChildScrollView(
+          child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
@@ -49,8 +59,7 @@ class _DetailScreenState extends State<DetailScreen> {
             child: TextField(
               controller: _titleController,
               decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter a search term',
+                hintText: 'タイトル',
               ),
             ),
           ),
@@ -60,14 +69,23 @@ class _DetailScreenState extends State<DetailScreen> {
               controller: _bodyController,
               keyboardType: TextInputType.multiline,
               maxLines: null,
+              onChanged: _onBodyChanged,
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
-                labelText: 'Enter your username',
+                hintText: "本文",
               ),
             ),
           ),
+          Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: SizedBox(
+                  height: 200.0,
+                  child: Markdown(
+                    selectable: true,
+                    data: markdown,
+                  ))),
         ],
-      ),
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _save();
