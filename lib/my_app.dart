@@ -1,17 +1,26 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'list_screen.dart';
+import 'screen/auth_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Widget home = FirebaseAuth.instance.currentUser == null
+        ? const AuthScreen()
+        : const ListScreen();
+
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const ListScreen(),
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: home,
+        routes: {
+          AuthScreen.routeName: (_) => const AuthScreen(),
+          ListScreen.routeName: (_) => const ListScreen(),
+        });
   }
 }
 
