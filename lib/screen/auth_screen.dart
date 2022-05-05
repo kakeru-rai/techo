@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../list_screen.dart';
 
@@ -20,19 +21,32 @@ class _AuthScreen extends State<AuthScreen> {
   }
 
   void _login(BuildContext context) async {
-    try {
-      final userCredential = await FirebaseAuth.instance.signInAnonymously();
-      print("Signed in with temporary account.");
-      Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case "operation-not-allowed":
-          print("Anonymous auth hasn't been enabled for this project.");
-          break;
-        default:
-          print("Unkown error.");
-      }
-    }
+    print("_login");
+    UserCredential credential = await _signInWithGoogle();
+    Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
+  }
+
+  Future<UserCredential> _signInWithAnonymous() async {
+    print("Signed in with temporary account.");
+    return FirebaseAuth.instance.signInAnonymously();
+  }
+
+  Future<UserCredential> _signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   @override
