@@ -1,10 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
+import 'package:flutter_hello_world/screen/auth_screen.dart';
 
 import 'detail_screen.dart';
 import 'domain/ticket.dart';
 
 class ListScreen extends StatefulWidget {
+  static const routeName = "list";
+
   const ListScreen({Key? key}) : super(key: key);
 
   @override
@@ -55,6 +59,11 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {});
   }
 
+  void _logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut().catchError((error) => print(error));
+    Navigator.of(context).pushReplacementNamed(AuthScreen.routeName);
+  }
+
   Future<void> _initList() async {
     print("_initList");
     items =
@@ -73,6 +82,13 @@ class _ListScreenState extends State<ListScreen> {
             tooltip: 'Update',
             onPressed: () {
               setState(() {});
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'logout',
+            onPressed: () {
+              _logout(context);
             },
           ),
         ],
