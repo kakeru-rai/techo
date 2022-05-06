@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Ticket {
   String id;
 
@@ -10,5 +12,17 @@ class Ticket {
   @override
   String toString() {
     return "$id:$title:$body";
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "title": title,
+      "body": body,
+    };
+  }
+
+  static Ticket fromFirestoreSnapshot(
+      DocumentSnapshot<Map<String, dynamic>> snapshot) {
+    return Ticket(snapshot.id, snapshot.get("title"), snapshot.get("body"));
   }
 }

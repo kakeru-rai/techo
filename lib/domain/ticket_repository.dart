@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hello_world/domain/ticket.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -6,11 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class TicketRepository {
   Future<List<Ticket>> getList() async {
     List<Ticket> tickets = [];
-    await _ticketCollection().get().then((QuerySnapshot value) => {
-          // ignore: avoid_print
-          tickets = List.from(value.docs.map((element) =>
-              Ticket(element.id, element.get("title"), element.get("body"))))
-        });
+    await _ticketCollection().get().then((QuerySnapshot<Ticket> value) =>
+        {tickets = List.from(value.docs.map((element) => element.data()))});
 
     return Future<List<Ticket>>.value(tickets);
   }
@@ -31,15 +29,7 @@ class TicketRepository {
   }
 
   Future<void> _insert(Ticket ticket) async {
-    await _ticketCollection()
-        .withConverter<Ticket>(
-          fromFirestore: (snapshot, _) => Ticket(
-              snapshot.get("id"), snapshot.get("title"), snapshot.get("body")),
-          toFirestore: (ticket, _) =>
-              {"title": ticket.title, "body": ticket.body},
-        )
-        .add(ticket)
-        .then((value) => ticket.id = value.id);
+    await _ticketCollection().add(ticket).then((value) => ticket.id = value.id);
     return;
   }
 
@@ -52,7 +42,7 @@ class TicketRepository {
     return Future<void>.value();
   }
 
-  CollectionReference<Map<String, dynamic>> _ticketCollection() {
+  CollectionReference<Ticket> _ticketCollection() {
     String? uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       throw Exception("uidが取得できませんでした");
@@ -61,6 +51,11 @@ class TicketRepository {
     return FirebaseFirestore.instance
         .collection("owner")
         .doc(uid)
-        .collection("tickets");
+        .collection("tickets")
+        .withConverter<Ticket>(
+          fromFirestore: (snapshot, _) =>
+              Ticket.fromFirestoreSnapshot(snapshot),
+          toFirestore: (ticket, _) => ticket.toJson(),
+        );
   }
 }

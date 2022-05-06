@@ -17,11 +17,12 @@ class _DetailScreenState extends State<DetailScreen> {
 
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
-  String markdown = "hoge";
+  String markdown = "";
 
   @override
   void initState() {
     super.initState();
+    markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
     _bodyController = TextEditingController(text: widget.ticket.body);
   }
