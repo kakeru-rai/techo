@@ -89,7 +89,6 @@ class _DetailScreenState extends State<DetailScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _save();
-          print("pop" + widget.ticket.toString());
           Navigator.pop<Ticket>(context, widget.ticket);
         },
         child: const Icon(Icons.add),
