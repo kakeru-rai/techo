@@ -22,10 +22,11 @@ class _AuthScreen extends State<AuthScreen> {
 
   void _login(BuildContext context) async {
     print("_login");
-    UserCredential credential = await _signInWithGoogle();
+    await _signInWithGoogle();
     Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
   }
 
+  // ignore: unused_element
   Future<UserCredential> _signInWithAnonymous() async {
     print("Signed in with temporary account.");
     return FirebaseAuth.instance.signInAnonymously();
