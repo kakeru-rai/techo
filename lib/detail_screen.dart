@@ -5,9 +5,8 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'domain/ticket.dart';
 
 class DetailScreen extends StatefulWidget {
-  DetailScreen({Key? key, required this.ticket}) : super(key: key);
+  const DetailScreen({Key? key, required this.ticket}) : super(key: key);
   final Ticket ticket;
-  String markdown = "hoge";
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -18,11 +17,12 @@ class _DetailScreenState extends State<DetailScreen> {
 
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
-  String markdown = "hoge";
+  String markdown = "";
 
   @override
   void initState() {
     super.initState();
+    markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
     _bodyController = TextEditingController(text: widget.ticket.body);
   }

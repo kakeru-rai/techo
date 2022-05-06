@@ -23,10 +23,16 @@ class _ListScreenState extends State<ListScreen> {
   @override
   void initState() {
     super.initState();
+
     Future(() async {
-      await TicketRepository().getList().then((list) => {items = list});
+      items = await _getList();
+      await _getList();
       setState(() {});
     });
+  }
+
+  Future<List<Ticket>> _getList() async {
+    return TicketRepository().getList();
   }
 
   void _add() {
@@ -41,7 +47,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _navigateDetail(BuildContext context, int index) async {
-    final result = await Navigator.push<Ticket>(
+    await Navigator.push<Ticket>(
       context,
       MaterialPageRoute(
           builder: (context) => DetailScreen(
@@ -66,8 +72,7 @@ class _ListScreenState extends State<ListScreen> {
 
   Future<void> _initList() async {
     print("_initList");
-    items =
-        await TicketRepository().getList(); // .then((list) => {items = list});
+    items = await _getList();
     return Future<void>.value();
   }
 
