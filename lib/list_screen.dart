@@ -32,7 +32,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   Future<List<Ticket>> _getList() async {
-    return TicketRepository().getListFromUid();
+    return TicketRepository().getList();
   }
 
   void _add() {
