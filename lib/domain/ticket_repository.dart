@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_hello_world/domain/ticket.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../shared/logger.dart';
 
 class TicketRepository {
   Future<List<Ticket>> getList() async {
@@ -37,8 +38,8 @@ class TicketRepository {
     await _ticketCollection()
         .doc(ticket.id)
         .delete()
-        .then((value) => {print("deleted")})
-        .catchError((error) => {print("Failed to delete user: $error")});
+        .then((value) => {logger.d("deleted")})
+        .catchError((error) => {logger.e("Failed to delete user: $error")});
     return Future<void>.value();
   }
 

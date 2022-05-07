@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../list_screen.dart';
+import '../shared/logger.dart';
 
 class AuthScreen extends StatefulWidget {
   static const String routeName = "auth";
@@ -21,33 +22,43 @@ class _AuthScreen extends State<AuthScreen> {
   }
 
   void _login(BuildContext context) async {
-    print("_login");
+    logger.d("login");
     await _signInWithGoogle();
     Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
   }
 
   // ignore: unused_element
   Future<UserCredential> _signInWithAnonymous() async {
-    print("Signed in with temporary account.");
     return FirebaseAuth.instance.signInAnonymously();
   }
 
   Future<UserCredential> _signInWithGoogle() async {
+    logger.d("_signInWithGoogle");
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn(
+      scopes: [
+        'email',
+      ],
+    ).signIn();
 
+    logger.d("_signInWithGoogle 2");
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
 
+    logger.d("_signInWithGoogle 3");
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
 
+    logger.d("_signInWithGoogle 4");
     // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    var userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    logger.d("_signInWithGoogle 5");
+    return userCredential;
   }
 
   @override

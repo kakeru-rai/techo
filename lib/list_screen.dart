@@ -6,6 +6,8 @@ import 'package:flutter_hello_world/screen/auth_screen.dart';
 import 'detail_screen.dart';
 import 'domain/ticket.dart';
 
+import 'shared/logger.dart';
+
 class ListScreen extends StatefulWidget {
   static const routeName = "list";
 
@@ -39,10 +41,6 @@ class _ListScreenState extends State<ListScreen> {
     setState(() {
       _counter += 1;
       items.add(Ticket("", "item $_counter", ""));
-
-      for (var element in items) {
-        print(element.title + element.body);
-      }
     });
   }
 
@@ -59,19 +57,19 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _delete(Ticket ticket) async {
-    print("list delete");
     await TicketRepository().delete(ticket);
     await _initList();
     setState(() {});
   }
 
   void _logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut().catchError((error) => print(error));
+    await FirebaseAuth.instance
+        .signOut()
+        .catchError((error) => logger.e(error));
     Navigator.of(context).pushReplacementNamed(AuthScreen.routeName);
   }
 
   Future<void> _initList() async {
-    print("_initList");
     items = await _getList();
     return Future<void>.value();
   }
