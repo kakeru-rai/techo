@@ -21,10 +21,10 @@ class _AuthScreen extends State<AuthScreen> {
     super.initState();
   }
 
-  void _login(BuildContext context) async {
+  void _loginWith(BuildContext context) async {
     logger.d("login");
-    await _signInWithGoogle();
-    Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
+    await _signInWithGoogle(FirebaseAuth.instance.currentUser);
+    Navigator.of(context).pop(ListScreen.routeName);
   }
 
   // ignore: unused_element
@@ -32,8 +32,7 @@ class _AuthScreen extends State<AuthScreen> {
     return FirebaseAuth.instance.signInAnonymously();
   }
 
-  Future<UserCredential> _signInWithGoogle() async {
-    logger.d("_signInWithGoogle");
+  Future<UserCredential> _signInWithGoogle(User? currentUserForBind) async {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn(
       scopes: [
@@ -41,23 +40,35 @@ class _AuthScreen extends State<AuthScreen> {
       ],
     ).signIn();
 
-    logger.d("_signInWithGoogle 2");
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
 
-    logger.d("_signInWithGoogle 3");
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
 
-    logger.d("_signInWithGoogle 4");
-    // Once signed in, return the UserCredential
-    var userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-    logger.d("_signInWithGoogle 5");
+    UserCredential userCredential;
+    if (currentUserForBind != null) {
+      try {
+        // Google認証アカウントを作成して匿名アカウントのデータを引き継ぐ
+        userCredential =
+            await currentUserForBind.linkWithCredential(credential);
+      } catch (e) {
+        logger.i(e.toString());
+        // すでに該当ユーザーのGoogle認証アカウントがある場合は既存アカウントでログインする
+        // 匿名アカウントで作業中のデータは破棄される
+        // [firebase_auth/credential-already-in-use] This credential is already associated with a different user account.
+        userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+      }
+    } else {
+      userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+    }
+
     return userCredential;
   }
 
@@ -67,12 +78,12 @@ class _AuthScreen extends State<AuthScreen> {
       appBar: AppBar(
         title: const Text("ログイン"),
       ),
-      body: const Text("ログイン"),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _login(context),
-        tooltip: 'add',
-        child: const Icon(Icons.add),
-      ),
+      body: Column(children: [
+        OutlinedButton(
+            onPressed: () => _loginWith(context),
+            child: const Text("Googleアカウントでログイン")),
+        const Text("・Googleアカウント連携して他のデバイスでデータを共有できるようになります"),
+      ]),
     );
   }
 }
