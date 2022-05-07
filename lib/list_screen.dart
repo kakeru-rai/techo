@@ -18,8 +18,9 @@ class ListScreen extends StatefulWidget {
 }
 
 class _ListScreenState extends State<ListScreen> {
-  List<Ticket> items = [];
-  String userName = "";
+  List<Ticket> _items = [];
+  String _userName = "";
+  User _currentUser = FirebaseAuth.instance.currentUser!;
 
   int _counter = 0;
 
@@ -39,7 +40,7 @@ class _ListScreenState extends State<ListScreen> {
   void _add() {
     setState(() {
       _counter += 1;
-      items.add(Ticket("", "item $_counter", ""));
+      _items.add(Ticket("", "item $_counter", ""));
     });
   }
 
@@ -48,7 +49,7 @@ class _ListScreenState extends State<ListScreen> {
       context,
       MaterialPageRoute(
           builder: (context) => DetailScreen(
-                ticket: items[index],
+                ticket: _items[index],
               )),
     );
 
@@ -73,48 +74,23 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _login(BuildContext context) async {
+    Navigator.pop(context);
     final result = await Navigator.pushNamed(context, AuthScreen.routeName);
     _setStateInitView();
   }
 
   Future<void> _setStateInitView() async {
-    items = await _getList();
-    userName = _userName();
+    _items = await _getList();
+    _userName = _getUserName();
     setState(() {});
   }
 
-  List<Widget> _createAppBarButton() {
-    var list = <Widget>[];
-
-    User currentUser = FirebaseAuth.instance.currentUser!;
-    if (currentUser.isAnonymous) {
-      list.add(IconButton(
-        icon: const Icon(Icons.login),
-        tooltip: 'login',
-        onPressed: () {
-          _login(context);
-        },
-      ));
-    } else {
-      list.add(IconButton(
-        icon: const Icon(Icons.logout),
-        tooltip: 'logout',
-        onPressed: () {
-          _logout(context);
-        },
-      ));
-    }
-    return list;
-  }
-
-  String _userName() {
-    User currentUser = FirebaseAuth.instance.currentUser!;
-
-    if (currentUser.isAnonymous) {
+  String _getUserName() {
+    if (_currentUser.isAnonymous) {
       return "匿名ユーザーさん";
-    } else if (currentUser.displayName != null &&
-        currentUser.displayName!.isNotEmpty) {
-      return currentUser.displayName!;
+    } else if (_currentUser.displayName != null &&
+        _currentUser.displayName!.isNotEmpty) {
+      return _currentUser.displayName!;
     } else {
       return "新規ユーザーさん";
     }
@@ -125,7 +101,6 @@ class _ListScreenState extends State<ListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("リスト1k"),
-        actions: _createAppBarButton(),
       ),
       drawer: Drawer(
         child: ListView(
@@ -136,23 +111,36 @@ class _ListScreenState extends State<ListScreen> {
                 decoration: const BoxDecoration(
                   color: Colors.white10,
                 ),
-                child: Text(userName),
+                child: Text(_userName),
               ),
+              _currentUser.isAnonymous
+                  ? ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('ログイン'),
+                      onTap: () {
+                        _login(context);
+                      })
+                  : ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('ログアウト'),
+                      onTap: () {
+                        _logout(context);
+                      }),
             ]),
       ),
       body: ListView.separated(
-        itemCount: items.length,
+        itemCount: _items.length,
         itemBuilder: (context, index) {
           return ListTile(
             onTap: () {
               _navigateDetail(context, index);
             },
-            title: Text(items[index].title),
-            subtitle: Text(items[index].body),
+            title: Text(_items[index].title),
+            subtitle: Text(_items[index].body),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                _delete(items[index]);
+                _delete(_items[index]);
               },
             ),
           );
