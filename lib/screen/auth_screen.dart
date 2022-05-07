@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../list_screen.dart';
+import '../shared/logger.dart';
 
 class AuthScreen extends StatefulWidget {
   static const String routeName = "auth";
@@ -21,6 +22,7 @@ class _AuthScreen extends State<AuthScreen> {
   }
 
   void _login(BuildContext context) async {
+    logger.d("login");
     await _signInWithGoogle();
     Navigator.of(context).pushReplacementNamed(ListScreen.routeName);
   }
@@ -31,8 +33,13 @@ class _AuthScreen extends State<AuthScreen> {
   }
 
   Future<UserCredential> _signInWithGoogle() async {
+    logger.d("_signInWithGoogle");
     // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn(
+      scopes: [
+        'email',
+      ],
+    ).signIn();
 
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
