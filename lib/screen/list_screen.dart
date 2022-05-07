@@ -34,18 +34,14 @@ class _ListScreenState extends State<ListScreen> {
     });
   }
 
-  Future<List<Ticket>> _getList() async {
-    return TicketRepository().getList();
-  }
-
-  void _add() {
+  void _onTicketAddTapped() {
     setState(() {
       _counter += 1;
       _items.add(Ticket("", "item $_counter", ""));
     });
   }
 
-  void _navigateDetail(BuildContext context, int index) async {
+  void _onListItemTapped(BuildContext context, int index) async {
     await Navigator.push<Ticket>(
       context,
       MaterialPageRoute(
@@ -57,12 +53,12 @@ class _ListScreenState extends State<ListScreen> {
     _setStateInitView();
   }
 
-  void _delete(Ticket ticket) async {
+  void _onListItemDeleteTapped(Ticket ticket) async {
     await TicketRepository().delete(ticket);
     _setStateInitView();
   }
 
-  void _logout(BuildContext context) async {
+  void _onLogoutTapped(BuildContext context) async {
     await FirebaseAuth.instance
         .signOut()
         .catchError((error) => logger.e(error));
@@ -70,11 +66,25 @@ class _ListScreenState extends State<ListScreen> {
     _setStateInitView();
   }
 
+  void _onLoginTapped(BuildContext context) async {
+    logger.d("login");
+    UserCredential userCredential =
+        await _signInWithGoogle(FirebaseAuth.instance.currentUser);
+    if (userCredential.user != null) {
+      Navigator.pop(context);
+      _setStateInitView();
+    }
+  }
+
   Future<void> _setStateInitView() async {
     _currentUser = FirebaseAuth.instance.currentUser!;
     _items = await _getList();
     _userName = _getUserName();
     setState(() {});
+  }
+
+  Future<List<Ticket>> _getList() async {
+    return TicketRepository().getList();
   }
 
   String _getUserName() {
@@ -85,16 +95,6 @@ class _ListScreenState extends State<ListScreen> {
       return _currentUser.displayName!;
     } else {
       return "新規ユーザーさん";
-    }
-  }
-
-  void _loginWith(BuildContext context) async {
-    logger.d("login");
-    UserCredential userCredential =
-        await _signInWithGoogle(FirebaseAuth.instance.currentUser);
-    if (userCredential.user != null) {
-      Navigator.pop(context);
-      _setStateInitView();
     }
   }
 
@@ -119,14 +119,14 @@ class _ListScreenState extends State<ListScreen> {
                   ? SignInButton(
                       Buttons.Google,
                       onPressed: () {
-                        _loginWith(context);
+                        _onLoginTapped(context);
                       },
                     )
                   : ListTile(
                       leading: const Icon(Icons.logout),
                       title: const Text('ログアウト'),
                       onTap: () {
-                        _logout(context);
+                        _onLogoutTapped(context);
                       }),
             ]),
       ),
@@ -135,14 +135,14 @@ class _ListScreenState extends State<ListScreen> {
         itemBuilder: (context, index) {
           return ListTile(
             onTap: () {
-              _navigateDetail(context, index);
+              _onListItemTapped(context, index);
             },
             title: Text(_items[index].title),
             subtitle: Text(_items[index].body),
             trailing: IconButton(
               icon: const Icon(Icons.delete),
               onPressed: () {
-                _delete(_items[index]);
+                _onListItemDeleteTapped(_items[index]);
               },
             ),
           );
@@ -152,7 +152,7 @@ class _ListScreenState extends State<ListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _add,
+        onPressed: _onTicketAddTapped,
         tooltip: 'add',
         child: const Icon(Icons.add),
       ),
