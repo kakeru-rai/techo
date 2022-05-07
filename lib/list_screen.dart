@@ -19,6 +19,7 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   List<Ticket> items = [];
+  String userName = "";
 
   int _counter = 0;
 
@@ -27,9 +28,7 @@ class _ListScreenState extends State<ListScreen> {
     super.initState();
 
     Future(() async {
-      items = await _getList();
-      await _getList();
-      setState(() {});
+      await _setStateInitView();
     });
   }
 
@@ -53,48 +52,93 @@ class _ListScreenState extends State<ListScreen> {
               )),
     );
 
-    setState(() {});
+    _setStateInitView();
   }
 
   void _delete(Ticket ticket) async {
     await TicketRepository().delete(ticket);
-    await _initList();
-    setState(() {});
+    _setStateInitView();
   }
 
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance
         .signOut()
         .catchError((error) => logger.e(error));
-    Navigator.of(context).pushReplacementNamed(AuthScreen.routeName);
+    await _signInWithAnonymous();
+    _setStateInitView();
   }
 
-  Future<void> _initList() async {
+  Future<UserCredential> _signInWithAnonymous() async {
+    return FirebaseAuth.instance.signInAnonymously();
+  }
+
+  void _login(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, AuthScreen.routeName);
+    _setStateInitView();
+  }
+
+  Future<void> _setStateInitView() async {
     items = await _getList();
-    return Future<void>.value();
+    userName = _userName();
+    setState(() {});
+  }
+
+  List<Widget> _createAppBarButton() {
+    var list = <Widget>[];
+
+    User currentUser = FirebaseAuth.instance.currentUser!;
+    if (currentUser.isAnonymous) {
+      list.add(IconButton(
+        icon: const Icon(Icons.login),
+        tooltip: 'login',
+        onPressed: () {
+          _login(context);
+        },
+      ));
+    } else {
+      list.add(IconButton(
+        icon: const Icon(Icons.logout),
+        tooltip: 'logout',
+        onPressed: () {
+          _logout(context);
+        },
+      ));
+    }
+    return list;
+  }
+
+  String _userName() {
+    User currentUser = FirebaseAuth.instance.currentUser!;
+
+    if (currentUser.isAnonymous) {
+      return "匿名ユーザーさん";
+    } else if (currentUser.displayName != null &&
+        currentUser.displayName!.isNotEmpty) {
+      return currentUser.displayName!;
+    } else {
+      return "新規ユーザーさん";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("リスト"),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.update),
-            tooltip: 'Update',
-            onPressed: () {
-              setState(() {});
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'logout',
-            onPressed: () {
-              _logout(context);
-            },
-          ),
-        ],
+        title: const Text("リスト1k"),
+        actions: _createAppBarButton(),
+      ),
+      drawer: Drawer(
+        child: ListView(
+            // Important: Remove any padding from the ListView.
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Colors.white10,
+                ),
+                child: Text(userName),
+              ),
+            ]),
       ),
       body: ListView.separated(
         itemCount: items.length,

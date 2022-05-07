@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'my_app.dart';
 
@@ -12,7 +13,13 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  logger.d("main");
+  if (FirebaseAuth.instance.currentUser == null) {
+    await _signInWithAnonymous();
+  }
 
   runApp(const MyApp());
+}
+
+Future<UserCredential> _signInWithAnonymous() async {
+  return FirebaseAuth.instance.signInAnonymously();
 }
