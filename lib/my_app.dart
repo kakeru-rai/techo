@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'list_screen.dart';
-import 'screen/auth_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -13,7 +12,6 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.blue),
         home: const ListScreen(),
         routes: {
-          AuthScreen.routeName: (_) => const AuthScreen(),
           ListScreen.routeName: (_) => const ListScreen(),
         });
   }
