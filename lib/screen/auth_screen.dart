@@ -41,18 +41,24 @@ class _AuthScreen extends State<AuthScreen> {
       ],
     ).signIn();
 
+    logger.d("_signInWithGoogle 2");
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
 
+    logger.d("_signInWithGoogle 3");
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth?.accessToken,
       idToken: googleAuth?.idToken,
     );
 
+    logger.d("_signInWithGoogle 4");
     // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    var userCredential =
+        await FirebaseAuth.instance.signInWithCredential(credential);
+    logger.d("_signInWithGoogle 5");
+    return userCredential;
   }
 
   @override
