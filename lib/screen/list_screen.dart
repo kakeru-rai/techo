@@ -58,12 +58,13 @@ class _ListScreenState extends State<ListScreen> {
     _setStateInitView();
   }
 
-  void _onLogoutTapped(BuildContext context) async {
+  void _onLogoutTapped() async {
     await FirebaseAuth.instance
         .signOut()
         .catchError((error) => logger.e(error));
     await _signInWithAnonymous();
     _setStateInitView();
+    Navigator.pop(context);
   }
 
   void _onLoginTapped(BuildContext context) async {
@@ -101,7 +102,7 @@ class _ListScreenState extends State<ListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("リスト1k"),
+        title: const Text("メモ"),
       ),
       drawer: Drawer(
         child: ListView(
@@ -125,7 +126,7 @@ class _ListScreenState extends State<ListScreen> {
                       leading: const Icon(Icons.logout),
                       title: const Text('ログアウト'),
                       onTap: () {
-                        _onLogoutTapped(context);
+                        _onLogoutTapped();
                       }),
             ]),
       ),
