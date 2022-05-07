@@ -5,9 +5,9 @@ import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'detail_screen.dart';
-import 'domain/ticket.dart';
+import '../domain/ticket.dart';
 
-import 'shared/logger.dart';
+import '../shared/logger.dart';
 
 class ListScreen extends StatefulWidget {
   static const routeName = "list";
@@ -90,9 +90,8 @@ class _ListScreenState extends State<ListScreen> {
   String _getUserName() {
     if (_currentUser.isAnonymous) {
       return "匿名ユーザーさん";
-    } else if (_currentUser.displayName != null &&
-        _currentUser.displayName!.isNotEmpty) {
-      return _currentUser.displayName!;
+    } else if (_currentUser.email != null && _currentUser.email!.isNotEmpty) {
+      return _currentUser.email!;
     } else {
       return "新規ユーザーさん";
     }

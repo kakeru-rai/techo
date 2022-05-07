@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import 'domain/ticket.dart';
+import '../domain/ticket.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({Key? key, required this.ticket}) : super(key: key);
