@@ -149,11 +149,11 @@ class _ListScreenState extends State<ListScreen> {
             },
             title: Text(items[index].title),
             subtitle: Text(items[index].body),
-            trailing: OutlinedButton(
+            trailing: IconButton(
+              icon: const Icon(Icons.delete),
               onPressed: () {
                 _delete(items[index]);
               },
-              child: const Text("X"),
             ),
           );
         },
