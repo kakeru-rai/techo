@@ -113,7 +113,16 @@ class _ListScreenState extends State<ListScreen> {
                 decoration: const BoxDecoration(
                   color: Colors.white10,
                 ),
-                child: Text(_userName),
+                child: Column(
+                  children: [
+                    Icon(
+                        _currentUser.isAnonymous
+                            ? Icons.account_circle
+                            : Icons.face,
+                        size: 80.0),
+                    Text(_userName),
+                  ],
+                ),
               ),
               _currentUser.isAnonymous
                   ? SignInButton(
