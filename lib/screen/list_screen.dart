@@ -22,22 +22,34 @@ class _ListScreenState extends State<ListScreen> {
   List<Ticket> _items = [];
   String _userName = "";
   User _currentUser = FirebaseAuth.instance.currentUser!;
-
-  int _counter = 0;
+  late TextEditingController _titleController;
 
   @override
   void initState() {
     super.initState();
 
+    _titleController = TextEditingController();
     Future(() async {
       await _setStateInitView();
     });
   }
 
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
   void _onTicketAddTapped() {
+    if (_titleController.text.isEmpty) {
+      return;
+    }
+
     setState(() {
-      _counter += 1;
-      _items.add(Ticket("", "item $_counter", ""));
+      final ticket = Ticket("", _titleController.text, "");
+      TicketRepository().upsert(ticket);
+      _items.add(ticket);
+      _titleController.text = "";
     });
   }
 
@@ -139,32 +151,45 @@ class _ListScreenState extends State<ListScreen> {
                       }),
             ]),
       ),
-      body: ListView.separated(
-        itemCount: _items.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            onTap: () {
-              _onListItemTapped(context, index);
+      body: Column(children: [
+        Expanded(
+          child: ListView.separated(
+            itemCount: _items.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                onTap: () {
+                  _onListItemTapped(context, index);
+                },
+                title: Text(_items[index].title),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    _onListItemDeleteTapped(_items[index]);
+                  },
+                ),
+              );
             },
-            title: Text(_items[index].title),
-            subtitle: Text(_items[index].body),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () {
-                _onListItemDeleteTapped(_items[index]);
-              },
-            ),
-          );
-        },
-        separatorBuilder: (context, index) {
-          return const Divider();
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _onTicketAddTapped,
-        tooltip: 'add',
-        child: const Icon(Icons.add),
-      ),
+            separatorBuilder: (context, index) {
+              return const Divider();
+            },
+          ),
+        ),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: Row(children: [
+              Expanded(
+                  child: TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  hintText: 'タイトル',
+                ),
+              )),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: _onTicketAddTapped,
+              )
+            ]))
+      ]),
     );
   }
 }
