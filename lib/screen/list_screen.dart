@@ -54,7 +54,7 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _onListItemTapped(BuildContext context, int index) async {
-    await Navigator.push<Ticket>(
+    var result = await Navigator.push<Ticket>(
       context,
       MaterialPageRoute(
           builder: (context) => DetailScreen(

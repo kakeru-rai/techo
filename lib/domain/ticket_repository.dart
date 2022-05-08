@@ -15,7 +15,7 @@ class TicketRepository {
     return Future<List<Ticket>>.value(tickets);
   }
 
-  void upsert(Ticket ticket) async {
+  Future<void> upsert(Ticket ticket) async {
     if (ticket.id.isEmpty) {
       await _insert(ticket);
     } else {

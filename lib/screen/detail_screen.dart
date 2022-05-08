@@ -27,11 +27,10 @@ class _DetailScreenState extends State<DetailScreen> {
     _bodyController = TextEditingController(text: widget.ticket.body);
   }
 
-  void _save() {
+  void _save() async {
     widget.ticket.title = _titleController.text;
     widget.ticket.body = _bodyController.text;
-
-    TicketRepository().upsert(widget.ticket);
+    await TicketRepository().upsert(widget.ticket);
   }
 
   void _onBodyChanged(String text) {
@@ -43,56 +42,66 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void dispose() {
     _titleController.dispose();
+    _bodyController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.ticket.title)),
-      body: SingleChildScrollView(
-          child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                hintText: 'タイトル',
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: TextFormField(
-              controller: _bodyController,
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              onChanged: _onBodyChanged,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                hintText: "本文",
-              ),
-            ),
-          ),
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: SizedBox(
-                  height: 200.0,
-                  child: Markdown(
-                    selectable: true,
-                    data: markdown,
-                  ))),
-        ],
-      )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
+    return WillPopScope(
+        onWillPop: () {
           _save();
-          Navigator.pop<Ticket>(context, widget.ticket);
+          // Navigator.of(context).pop("");
+          return Future.value(true);
         },
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        child: Scaffold(
+          appBar: AppBar(title: Text(widget.ticket.title)),
+          body: SingleChildScrollView(
+              child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
+                    hintText: 'タイトル',
+                  ),
+                ),
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: TextFormField(
+                  controller: _bodyController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  onChanged: _onBodyChanged,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    hintText: "本文",
+                  ),
+                ),
+              ),
+              Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: SizedBox(
+                      height: 200.0,
+                      child: Markdown(
+                        selectable: true,
+                        data: markdown,
+                      ))),
+            ],
+          )),
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () {
+          //     _save();
+          //     Navigator.pop<Ticket>(context, widget.ticket);
+          //   },
+          //   child: const Icon(Icons.add),
+          // ), // This trailing comma makes auto-formatting nicer for build methods.
+        ));
   }
 }
