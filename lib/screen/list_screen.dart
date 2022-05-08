@@ -47,7 +47,7 @@ class _ListScreenState extends State<ListScreen> {
 
     setState(() {
       _items.insert(0, Ticket("", _titleController.text, "", 0));
-      updateSort(_items);
+      _updateSort(_items);
 
       _titleController.text = "";
     });
@@ -69,7 +69,7 @@ class _ListScreenState extends State<ListScreen> {
     await TicketRepository().delete(_items[itemIndex]);
 
     _items.removeAt(itemIndex);
-    updateSort(_items);
+    _updateSort(_items);
 
     _setStateInitView();
   }
@@ -181,22 +181,24 @@ class _ListScreenState extends State<ListScreen> {
               ),
             ),
             Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Row(children: [
-              Expanded(
-                  child: TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  hintText: 'タイトル',
-                ),
-              )),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: _onTicketAddTapped,
-              )
-            ]))
-      ]),
-    );
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(children: [
+                  Expanded(
+                      child: TextField(
+                    autofocus: false,
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      hintText: 'タイトル',
+                    ),
+                  )),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: _onTicketAddTapped,
+                  )
+                ]))
+          ]),
+        ));
   }
 }
 
@@ -243,7 +245,7 @@ Future<UserCredential> _signInWithGoogle(User? currentUserForBind) async {
   return userCredential;
 }
 
-void updateSort(List<Ticket> _items) {
+void _updateSort(List<Ticket> _items) {
   int lastIndex = _items.length - 1;
   _items.asMap().forEach((index, ticket) {
     int newSort = lastIndex - index;
