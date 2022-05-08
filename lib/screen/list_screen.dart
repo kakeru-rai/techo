@@ -186,6 +186,7 @@ class _ListScreenState extends State<ListScreen> {
                 child: Row(children: [
                   Expanded(
                       child: TextField(
+                    onEditingComplete: _onTicketAddTapped,
                     autofocus: false,
                     controller: _titleController,
                     decoration: const InputDecoration(
