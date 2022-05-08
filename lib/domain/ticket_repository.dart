@@ -8,8 +8,9 @@ import '../shared/logger.dart';
 class TicketRepository {
   Future<List<Ticket>> getList() async {
     List<Ticket> tickets = [];
-    await _ticketCollection().get().then((QuerySnapshot<Ticket> value) =>
-        {tickets = List.from(value.docs.map((element) => element.data()))});
+    await _ticketCollection().orderBy("sort", descending: true).get().then(
+        (QuerySnapshot<Ticket> value) =>
+            {tickets = List.from(value.docs.map((element) => element.data()))});
 
     return Future<List<Ticket>>.value(tickets);
   }
@@ -23,10 +24,7 @@ class TicketRepository {
   }
 
   Future<void> _update(Ticket ticket) async {
-    await _ticketCollection().doc(ticket.id).update({
-      "title": ticket.title,
-      "body": ticket.body,
-    });
+    await _ticketCollection().doc(ticket.id).set(ticket);
   }
 
   Future<void> _insert(Ticket ticket) async {

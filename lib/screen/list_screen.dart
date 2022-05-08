@@ -46,9 +46,9 @@ class _ListScreenState extends State<ListScreen> {
     }
 
     setState(() {
-      final ticket = Ticket("", _titleController.text, "");
-      TicketRepository().upsert(ticket);
-      _items.add(ticket);
+      _items.insert(0, Ticket("", _titleController.text, "", 0));
+      updateSort(_items);
+
       _titleController.text = "";
     });
   }
@@ -65,8 +65,12 @@ class _ListScreenState extends State<ListScreen> {
     _setStateInitView();
   }
 
-  void _onListItemDeleteTapped(Ticket ticket) async {
-    await TicketRepository().delete(ticket);
+  void _onListItemDeleteTapped(int itemIndex) async {
+    await TicketRepository().delete(_items[itemIndex]);
+
+    _items.removeAt(itemIndex);
+    updateSort(_items);
+
     _setStateInitView();
   }
 
@@ -164,7 +168,7 @@ class _ListScreenState extends State<ListScreen> {
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    _onListItemDeleteTapped(_items[index]);
+                    _onListItemDeleteTapped(index);
                   },
                 ),
               );
@@ -235,4 +239,16 @@ Future<UserCredential> _signInWithGoogle(User? currentUserForBind) async {
   }
 
   return userCredential;
+}
+
+void updateSort(List<Ticket> _items) {
+  int lastIndex = _items.length - 1;
+  _items.asMap().forEach((index, ticket) {
+    int newSort = lastIndex - index;
+    if (ticket.sort == newSort) {
+      return;
+    }
+    ticket.sort = newSort;
+    TicketRepository().upsert(ticket);
+  });
 }

@@ -7,7 +7,9 @@ class Ticket {
 
   String body;
 
-  Ticket(this.id, this.title, this.body);
+  int sort = 0;
+
+  Ticket(this.id, this.title, this.body, this.sort);
 
   @override
   String toString() {
@@ -18,11 +20,13 @@ class Ticket {
     return {
       "title": title,
       "body": body,
+      "sort": sort,
     };
   }
 
   static Ticket fromFirestoreSnapshot(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    return Ticket(snapshot.id, snapshot.get("title"), snapshot.get("body"));
+    return Ticket(snapshot.id, snapshot.get("title"), snapshot.get("body"),
+        snapshot.data()!.containsKey("sort") ? snapshot.get("sort") : 0);
   }
 }
