@@ -46,15 +46,15 @@ class _ListScreenState extends State<ListScreen> {
     }
 
     setState(() {
-      final ticket = Ticket("", _titleController.text, "");
-      TicketRepository().upsert(ticket);
-      _items.add(ticket);
+      _items.insert(0, Ticket("", _titleController.text, "", 0));
+      _updateSort(_items);
+
       _titleController.text = "";
     });
   }
 
   void _onListItemTapped(BuildContext context, int index) async {
-    await Navigator.push<Ticket>(
+    var result = await Navigator.push<Ticket>(
       context,
       MaterialPageRoute(
           builder: (context) => DetailScreen(
@@ -65,8 +65,12 @@ class _ListScreenState extends State<ListScreen> {
     _setStateInitView();
   }
 
-  void _onListItemDeleteTapped(Ticket ticket) async {
-    await TicketRepository().delete(ticket);
+  void _onListItemDeleteTapped(int itemIndex) async {
+    await TicketRepository().delete(_items[itemIndex]);
+
+    _items.removeAt(itemIndex);
+    _updateSort(_items);
+
     _setStateInitView();
   }
 
@@ -112,85 +116,90 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("メモ"),
-      ),
-      drawer: Drawer(
-        child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.white10,
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                        _currentUser.isAnonymous
-                            ? Icons.account_circle
-                            : Icons.face,
-                        size: 80.0),
-                    Text(_userName),
-                  ],
-                ),
-              ),
-              _currentUser.isAnonymous
-                  ? SignInButton(
-                      Buttons.Google,
-                      onPressed: () {
-                        _onLoginTapped(context);
-                      },
-                    )
-                  : ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text('ログアウト'),
-                      onTap: () {
-                        _onLogoutTapped();
-                      }),
-            ]),
-      ),
-      body: Column(children: [
-        Expanded(
-          child: ListView.separated(
-            itemCount: _items.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                onTap: () {
-                  _onListItemTapped(context, index);
-                },
-                title: Text(_items[index].title),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    _onListItemDeleteTapped(_items[index]);
-                  },
-                ),
-              );
-            },
-            separatorBuilder: (context, index) {
-              return const Divider();
-            },
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("メモ"),
           ),
-        ),
-        Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Row(children: [
-              Expanded(
-                  child: TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  hintText: 'タイトル',
-                ),
-              )),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: _onTicketAddTapped,
-              )
-            ]))
-      ]),
-    );
+          drawer: Drawer(
+            child: ListView(
+                // Important: Remove any padding from the ListView.
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: const BoxDecoration(
+                      color: Colors.white10,
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                            _currentUser.isAnonymous
+                                ? Icons.account_circle
+                                : Icons.face,
+                            size: 80.0),
+                        Text(_userName),
+                      ],
+                    ),
+                  ),
+                  _currentUser.isAnonymous
+                      ? SignInButton(
+                          Buttons.Google,
+                          onPressed: () {
+                            _onLoginTapped(context);
+                          },
+                        )
+                      : ListTile(
+                          leading: const Icon(Icons.logout),
+                          title: const Text('ログアウト'),
+                          onTap: () {
+                            _onLogoutTapped();
+                          }),
+                ]),
+          ),
+          body: Column(children: [
+            Expanded(
+              child: ListView.separated(
+                itemCount: _items.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      _onListItemTapped(context, index);
+                    },
+                    title: Text(_items[index].title),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _onListItemDeleteTapped(index);
+                      },
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+              ),
+            ),
+            Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: Row(children: [
+                  Expanded(
+                      child: TextField(
+                    onEditingComplete: _onTicketAddTapped,
+                    autofocus: false,
+                    controller: _titleController,
+                    decoration: const InputDecoration(
+                      hintText: 'タイトル',
+                    ),
+                  )),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: _onTicketAddTapped,
+                  )
+                ]))
+          ]),
+        ));
   }
 }
 
@@ -235,4 +244,16 @@ Future<UserCredential> _signInWithGoogle(User? currentUserForBind) async {
   }
 
   return userCredential;
+}
+
+void _updateSort(List<Ticket> _items) {
+  int lastIndex = _items.length - 1;
+  _items.asMap().forEach((index, ticket) {
+    int newSort = lastIndex - index;
+    if (ticket.sort == newSort) {
+      return;
+    }
+    ticket.sort = newSort;
+    TicketRepository().upsert(ticket);
+  });
 }
