@@ -116,69 +116,71 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("メモ"),
-      ),
-      drawer: Drawer(
-        child: ListView(
-            // Important: Remove any padding from the ListView.
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: const BoxDecoration(
-                  color: Colors.white10,
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                        _currentUser.isAnonymous
-                            ? Icons.account_circle
-                            : Icons.face,
-                        size: 80.0),
-                    Text(_userName),
-                  ],
-                ),
-              ),
-              _currentUser.isAnonymous
-                  ? SignInButton(
-                      Buttons.Google,
-                      onPressed: () {
-                        _onLoginTapped(context);
-                      },
-                    )
-                  : ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text('ログアウト'),
-                      onTap: () {
-                        _onLogoutTapped();
-                      }),
-            ]),
-      ),
-      body: Column(children: [
-        Expanded(
-          child: ListView.separated(
-            itemCount: _items.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                onTap: () {
-                  _onListItemTapped(context, index);
-                },
-                title: Text(_items[index].title),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    _onListItemDeleteTapped(index);
-                  },
-                ),
-              );
-            },
-            separatorBuilder: (context, index) {
-              return const Divider();
-            },
+    return GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("メモ"),
           ),
-        ),
-        Padding(
+          drawer: Drawer(
+            child: ListView(
+                // Important: Remove any padding from the ListView.
+                padding: EdgeInsets.zero,
+                children: [
+                  DrawerHeader(
+                    decoration: const BoxDecoration(
+                      color: Colors.white10,
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(
+                            _currentUser.isAnonymous
+                                ? Icons.account_circle
+                                : Icons.face,
+                            size: 80.0),
+                        Text(_userName),
+                      ],
+                    ),
+                  ),
+                  _currentUser.isAnonymous
+                      ? SignInButton(
+                          Buttons.Google,
+                          onPressed: () {
+                            _onLoginTapped(context);
+                          },
+                        )
+                      : ListTile(
+                          leading: const Icon(Icons.logout),
+                          title: const Text('ログアウト'),
+                          onTap: () {
+                            _onLogoutTapped();
+                          }),
+                ]),
+          ),
+          body: Column(children: [
+            Expanded(
+              child: ListView.separated(
+                itemCount: _items.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    onTap: () {
+                      _onListItemTapped(context, index);
+                    },
+                    title: Text(_items[index].title),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _onListItemDeleteTapped(index);
+                      },
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+              ),
+            ),
+            Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: Row(children: [
               Expanded(
