@@ -159,24 +159,33 @@ class _ListScreenState extends State<ListScreen> {
           ),
           body: Column(children: [
             Expanded(
-              child: ListView.separated(
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    onTap: () {
-                      _onListItemTapped(context, index);
-                    },
-                    title: Text(_items[index].title),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        _onListItemDeleteTapped(index);
+              child: ReorderableListView(
+                children: <Widget>[
+                  for (int index = 0; index < _items.length; ++index)
+                    ListTile(
+                      key: Key(_items[index].id),
+                      onTap: () {
+                        _onListItemTapped(context, index);
                       },
-                    ),
-                  );
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider();
+                      title: Text(_items[index].title),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          _onListItemDeleteTapped(index);
+                        },
+                      ),
+                    )
+                ],
+                onReorder: (int oldIndex, int newIndex) {
+                  setState(() {
+                    if (oldIndex < newIndex) {
+                      newIndex -= 1;
+                    }
+                    final Ticket item = _items.removeAt(oldIndex);
+                    _items.insert(newIndex, item);
+                    _updateSort(_items);
+                  });
+                  ;
                 },
               ),
             ),
