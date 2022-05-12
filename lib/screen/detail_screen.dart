@@ -50,11 +50,6 @@ class _DetailScreenState extends State<DetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    FocusNode focusNode = FocusNode();
-    focusNode.addListener(() {
-      logger.d(focusNode.hasFocus);
-    });
-
     return WillPopScope(
         onWillPop: () {
           _save();
