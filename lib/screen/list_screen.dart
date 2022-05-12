@@ -185,7 +185,6 @@ class _ListScreenState extends State<ListScreen> {
                     _items.insert(newIndex, item);
                     _updateSort(_items);
                   });
-                  ;
                 },
               ),
             ),
