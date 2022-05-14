@@ -54,6 +54,8 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _onListItemTapped(BuildContext context, int index) async {
+    // 返り値を変数に入れないと待ってくれないので
+    // ignore: unused_local_variable
     var result = await Navigator.push<Ticket>(
       context,
       MaterialPageRoute(
