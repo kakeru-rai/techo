@@ -19,7 +19,7 @@ class _DetailScreenState extends State<DetailScreen> {
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
   String markdown = "";
-  bool _isPreview = false;
+  bool _isPreview = true;
 
   @override
   void initState() {
@@ -27,6 +27,7 @@ class _DetailScreenState extends State<DetailScreen> {
     markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
     _bodyController = TextEditingController(text: widget.ticket.body);
+    _isPreview = widget.ticket.body.isEmpty ? false : true;
   }
 
   void _save() async {
@@ -52,40 +53,60 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () {
-          _save();
-          return Future.value(true);
+          if (Navigator.of(context).userGestureInProgress || _isPreview) {
+            _save();
+            return Future.value(true);
+          }
+
+          setState(() {
+            _isPreview = true;
+          });
+          return Future.value(false);
         },
         child: Scaffold(
           appBar: AppBar(
             title: Text(widget.ticket.title),
-            actions: [
-              _isPreview
-                  ? IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        setState(() {
-                          _isPreview = false;
-                        });
-                      })
-                  : IconButton(
-                      icon: const Icon(Icons.preview),
-                      onPressed: () {
-                        setState(() {
-                          _isPreview = true;
-                        });
-                      })
-            ],
+            leading: Builder(
+              builder: (BuildContext context) {
+                return _isPreview
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.check),
+                        onPressed: () {
+                          setState(() {
+                            _isPreview = true;
+                          });
+                        },
+                      );
+              },
+            ),
           ),
           body: _isPreview
               ? Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: Markdown(
-                    data: markdown,
-                    selectable: true,
-                    shrinkWrap: true,
-                    softLineBreak: true,
-                  ))
+                  child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isPreview = false;
+                        });
+                      },
+                      child: Markdown(
+                        data: markdown,
+                        selectable: true,
+                        shrinkWrap: true,
+                        softLineBreak: true,
+                        onTapText: () {
+                          setState(() {
+                            _isPreview = false;
+                          });
+                        },
+                      )))
               : SingleChildScrollView(
                   child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

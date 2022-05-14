@@ -99,3 +99,4 @@ flutter:
 
 scripts:
   run-chrome: flutter run -d Chrome --web-port 5000
+  run-pixel3: flutter run -d "Pixel 3"
