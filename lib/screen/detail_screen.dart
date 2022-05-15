@@ -50,12 +50,17 @@ class _DetailScreenState extends State<DetailScreen> {
     super.dispose();
   }
 
-  void setPreview(bool isPreview) {
+  void _setPreview(bool isPreview) {
     setState(() {
       _isPreview = isPreview;
       _uiBuilder =
           _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
     });
+  }
+
+  void _pop() {
+    _save();
+    Navigator.pop(context);
   }
 
   @override
@@ -73,7 +78,7 @@ class _DetailScreenState extends State<DetailScreen> {
             _save();
             return Future.value(true);
           } else {
-            setPreview(true);
+            _setPreview(true);
             return Future.value(false);
           }
         },
@@ -104,7 +109,7 @@ class _EditModeScreen extends DetailScreenUiBuilder {
     return IconButton(
       icon: const Icon(Icons.check),
       onPressed: () {
-        parent.setPreview(true);
+        parent._setPreview(true);
       },
     );
   }
@@ -151,7 +156,7 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        Navigator.pop(parent.context);
+        parent._pop();
       },
     );
   }
@@ -162,7 +167,7 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: GestureDetector(
             onTap: () {
-              parent.setPreview(false);
+              parent._setPreview(false);
             },
             child: Markdown(
               data: parent.markdown,
@@ -170,7 +175,7 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
               shrinkWrap: true,
               softLineBreak: true,
               onTapText: () {
-                parent.setPreview(false);
+                parent._setPreview(false);
               },
             )));
   }
