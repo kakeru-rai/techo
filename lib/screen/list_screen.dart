@@ -190,24 +190,34 @@ class _ListScreenState extends State<ListScreen> {
                 },
               ),
             ),
-            Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: Row(children: [
-                  Expanded(
-                      child: TextField(
-                    onEditingComplete: _onTicketAddTapped,
-                    autofocus: false,
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      hintText: 'タイトル',
+            Container(
+                color: Colors.black12,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: Colors.white70,
                     ),
-                  )),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: _onTicketAddTapped,
-                  )
-                ]))
+                    child: Row(children: [
+                      Expanded(
+                          child: TextField(
+                        onEditingComplete: _onTicketAddTapped,
+                        autofocus: false,
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          hintText: 'タイトル',
+                          hintStyle:
+                              TextStyle(fontSize: 14, color: Colors.black26),
+                          border: InputBorder.none,
+                        ),
+                      )),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: _onTicketAddTapped,
+                      )
+                    ])))
           ]),
         ));
   }
