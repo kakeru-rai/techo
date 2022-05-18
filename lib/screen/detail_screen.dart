@@ -26,6 +26,9 @@ class _DetailScreenState extends State<DetailScreen> {
     super.initState();
     markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
+    _titleController.addListener(() {
+      widget.ticket.title = _titleController.text;
+    });
     _bodyController = TextEditingController(text: widget.ticket.body);
     _isPreview = widget.ticket.body.isEmpty ? false : true;
     _uiBuilder = _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
@@ -169,14 +172,17 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
             onTap: () {
               parent._setPreview(false);
             },
-            child: Markdown(
-              data: parent.markdown,
-              selectable: true,
-              shrinkWrap: true,
-              softLineBreak: true,
-              onTapText: () {
-                parent._setPreview(false);
-              },
-            )));
+            child: parent.markdown.isEmpty
+                ? const Text("まだ何も入力されていません。タップして入力を開始。",
+                    style: TextStyle(color: Colors.black26))
+                : Markdown(
+                    data: parent.markdown,
+                    selectable: true,
+                    shrinkWrap: true,
+                    softLineBreak: true,
+                    onTapText: () {
+                      parent._setPreview(false);
+                    },
+                  )));
   }
 }
