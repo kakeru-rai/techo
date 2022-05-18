@@ -169,14 +169,17 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
             onTap: () {
               parent._setPreview(false);
             },
-            child: Markdown(
-              data: parent.markdown,
-              selectable: true,
-              shrinkWrap: true,
-              softLineBreak: true,
-              onTapText: () {
-                parent._setPreview(false);
-              },
-            )));
+            child: parent.markdown.isEmpty
+                ? const Text("まだ何も入力されていません。タップして入力を開始。",
+                    style: TextStyle(color: Colors.black26))
+                : Markdown(
+                    data: parent.markdown,
+                    selectable: true,
+                    shrinkWrap: true,
+                    softLineBreak: true,
+                    onTapText: () {
+                      parent._setPreview(false);
+                    },
+                  )));
   }
 }
