@@ -26,6 +26,9 @@ class _DetailScreenState extends State<DetailScreen> {
     super.initState();
     markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
+    _titleController.addListener(() {
+      widget.ticket.title = _titleController.text;
+    });
     _bodyController = TextEditingController(text: widget.ticket.body);
     _isPreview = widget.ticket.body.isEmpty ? false : true;
     _uiBuilder = _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
