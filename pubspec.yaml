@@ -101,3 +101,6 @@ scripts:
   run-chrome: flutter run -d Chrome --web-port 5000
   run-pixel3: flutter run -d "Pixel 3"
   run-android: flutter run -d "sdk gphone x86"
+  deploy-hosting:
+    - flutter build web
+    - firebase deploy --only hosting
