@@ -3,6 +3,7 @@ import 'package:flutter_hello_world/domain/ticket_repository.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../domain/ticket.dart';
+import '../shared/logger.dart';
 
 class DetailScreen extends StatefulWidget {
   const DetailScreen({Key? key, required this.ticket}) : super(key: key);
@@ -29,6 +30,7 @@ class _DetailScreenState extends State<DetailScreen> {
     _titleController.addListener(() {
       widget.ticket.title = _titleController.text;
     });
+
     _bodyController = TextEditingController(text: widget.ticket.body);
     _isPreview = widget.ticket.body.isEmpty ? false : true;
     _uiBuilder = _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
@@ -86,16 +88,65 @@ class _DetailScreenState extends State<DetailScreen> {
           }
         },
         child: Scaffold(
-            appBar: AppBar(
-              title: Text(widget.ticket.title),
-              leading: Builder(
-                builder: (BuildContext context) {
-                  return _uiBuilder.appBarLeadingIconButton();
-                },
-              ),
+          appBar: AppBar(
+            title: Text(widget.ticket.title),
+            leading: Builder(
+              builder: (BuildContext context) {
+                return _uiBuilder.appBarLeadingIconButton();
+              },
             ),
-            body: _uiBuilder.scaffoldBody()));
+          ),
+          body: _uiBuilder.scaffoldBody(),
+          floatingActionButton: FloatingActionButton(onPressed: () {
+            setState(() {
+              var newCusorPosition = currentLineHeadPosition(
+                  _bodyController.text, _bodyController.selection.start);
+              var text = addMdTag(
+                  _bodyController.text, "#", _bodyController.selection.start);
+              _bodyController.text = text;
+
+              _bodyController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: newCusorPosition));
+            });
+          }),
+        ));
   }
+}
+
+int currentLineHeadPosition(String text, int cursorPosition) {
+  if (text.length < cursorPosition || cursorPosition < 0) {
+    throw Exception(
+        "Invalid cursorPosition: cursorPosition=$cursorPosition, textLength=${text.length}");
+  }
+  // カーソル位置までに現れる最後の改行
+  var textToCursorPosition = text.substring(0, cursorPosition);
+  var match = RegExp(r"[\s\S]*\n").firstMatch(textToCursorPosition);
+  if (match == null) {
+    // 改行がなければ文字列の先頭
+    return 0;
+  }
+
+  String matchText = match.group(0)!;
+  int lineHeadPosition = matchText.length;
+  var lines = textToCursorPosition.split("\n");
+  String lineText = lines[lines.length - 1];
+  int lineCount = lines.length;
+
+  return lineHeadPosition;
+}
+
+String addMdTag(String text, String tag, int cursorPosition) {
+  int addPosition = currentLineHeadPosition(text, cursorPosition);
+
+  var textToCursorPosition = text.substring(0, cursorPosition);
+  var cursorLineCount = textToCursorPosition.split("\n").length - 1;
+  String lineText = text.split("\n")[cursorLineCount];
+  var match = RegExp(r"" + tag + "+? ").firstMatch(lineText);
+  var addTagText = match == null ? tag + " " : tag;
+
+  return text.substring(0, addPosition) +
+      addTagText +
+      text.substring(addPosition);
 }
 
 abstract class DetailScreenUiBuilder {
