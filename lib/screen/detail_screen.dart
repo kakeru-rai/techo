@@ -143,8 +143,21 @@ String addMdTag(String text, String tag, int cursorPosition) {
   var textToCursorPosition = text.substring(0, cursorPosition);
   var cursorLineCount = textToCursorPosition.split("\n").length - 1;
   String lineText = text.split("\n")[cursorLineCount];
-  var match = RegExp(r"\" + tag + "+? ").firstMatch(lineText);
-  var addTagText = match == null ? tag + " " : tag;
+  var addTagText = "";
+  if (tag == "#") {
+    // 見出しタグ
+    var match = RegExp(r"^\" + tag + "+? ").firstMatch(lineText);
+    addTagText = match == null ? tag + " " : tag;
+  } else if (RegExp(r"^\" + tag + " ").firstMatch(lineText) != null) {
+    // 既に対象のタグがある
+    addTagText = "  ";
+  } else if (RegExp(r"^ {2,}\" + tag + " ").firstMatch(lineText) != null) {
+    // 既に対象のタグがありインデントされている
+    addTagText = "  ";
+  } else {
+    // 対象のタグがない
+    addTagText = tag + " ";
+  }
 
   return text.substring(0, addPosition) +
       addTagText +

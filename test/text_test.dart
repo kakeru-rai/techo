@@ -1,10 +1,3 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:test/test.dart';
 import 'package:flutter_hello_world/screen/detail_screen.dart';
 
@@ -43,7 +36,7 @@ void main() {
     expect(currentLineHeadPosition("\n", 1), 1, reason: "改行も文字列長に含まれる");
   });
 
-  test("addMdTag", () {
+  test("addMdTag 見出し", () {
     expect(addMdTag("abc", "#", 1), "# abc");
     expect(addMdTag("# abc", "#", 1), "## abc");
 
@@ -52,5 +45,10 @@ void main() {
     expect(addMdTag("a\nbc", "#", 3), "a\n# bc");
 
     expect(addMdTag("ab\nc", "#", 3), "ab\n# c");
+  });
+
+  test("addMdTag 箇条書き", () {
+    // expect(addMdTag("abc", "-", 1), "- abc");
+    expect(addMdTag("- abc", "-", 1), "  - abc");
   });
 }
