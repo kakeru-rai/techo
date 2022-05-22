@@ -180,12 +180,12 @@ class _EditModeScreen extends DetailScreenUiBuilder {
               ),
               child: Row(children: [
                 OutlinedButton(
-                    child: Text("見出し"),
+                    child: const Text("見出し"),
                     onPressed: (() {
                       parent._setStateMdTag(MdTag.header);
                     })),
                 OutlinedButton(
-                    child: Text("箇条書き"),
+                    child: const Text("箇条書き"),
                     onPressed: (() {
                       parent._setStateMdTag(MdTag.unorderedList);
                     })),
