@@ -192,33 +192,36 @@ class _ListScreenState extends State<ListScreen> {
             ),
             Container(
                 // ボトム入力フォーム
-                color: Colors.black12,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                color: Colors.grey[200],
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
                 child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(100),
                       color: Colors.white70,
                     ),
-                    child: Row(children: [
-                      Expanded(
-                          child: TextField(
-                        onEditingComplete: _onTicketAddTapped,
-                        autofocus: false,
-                        controller: _titleController,
-                        decoration: const InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          hintText: 'タイトル',
-                          hintStyle:
-                              TextStyle(fontSize: 14, color: Colors.black26),
-                          border: InputBorder.none,
-                        ),
-                      )),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: _onTicketAddTapped,
-                      )
-                    ])))
+                    child: SizedBox(
+                        height: 40,
+                        child: Row(children: [
+                          Expanded(
+                              child: TextField(
+                            onEditingComplete: _onTicketAddTapped,
+                            autofocus: false,
+                            controller: _titleController,
+                            style: const TextStyle(fontSize: 14),
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 12),
+                              hintText: 'タイトル',
+                              hintStyle: TextStyle(
+                                  fontSize: 14, color: Colors.black26),
+                              border: InputBorder.none,
+                            ),
+                          )),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: _onTicketAddTapped,
+                          )
+                        ]))))
           ]),
         ));
   }
