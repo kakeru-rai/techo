@@ -1,8 +1,18 @@
+import 'package:flutter_hello_world/domain/md_tagger.dart';
 import 'package:test/test.dart';
-import 'package:flutter_hello_world/screen/detail_screen.dart';
 
 void main() {
-  test("currentLineHeadPosition", () {
+  int currentLineHeadPosition(String text, int cursorPosition) {
+    var mt = MdTagger(text, MdTag.header, cursorPosition, cursorPosition);
+    return mt.currentLineHeadPosition;
+  }
+
+  String addMdTag(String text, MdTag tag, int cursorPosition) {
+    var mt = MdTagger(text, tag, cursorPosition, cursorPosition);
+    return mt.text;
+  }
+
+  test("mt.currentLineHeadPosition", () {
     expect(currentLineHeadPosition("", 0), 0);
     expect(currentLineHeadPosition("ab", 0), 0);
     expect(currentLineHeadPosition("ab", 1), 0);
@@ -18,7 +28,7 @@ void main() {
     expect(currentLineHeadPosition("ab\n", 3), 3);
   });
 
-  test("currentLineHeadPosition throwException", () {
+  test("mt.currentLineHeadPosition throwException", () {
     try {
       currentLineHeadPosition("", -1);
       expect(true, false);
@@ -36,19 +46,19 @@ void main() {
     expect(currentLineHeadPosition("\n", 1), 1, reason: "改行も文字列長に含まれる");
   });
 
-  test("addMdTag 見出し", () {
-    expect(addMdTag("abc", "#", 1), "# abc");
-    expect(addMdTag("# abc", "#", 1), "## abc");
+  test("mt.addMdTag 見出し", () {
+    expect(addMdTag("abc", MdTag.header, 1), "# abc");
+    expect(addMdTag("# abc", MdTag.header, 1), "## abc");
 
-    expect(addMdTag("a\nbc", "#", 1), "# a\nbc");
-    expect(addMdTag("a\nbc", "#", 2), "a\n# bc");
-    expect(addMdTag("a\nbc", "#", 3), "a\n# bc");
+    expect(addMdTag("a\nbc", MdTag.header, 1), "# a\nbc");
+    expect(addMdTag("a\nbc", MdTag.header, 2), "a\n# bc");
+    expect(addMdTag("a\nbc", MdTag.header, 3), "a\n# bc");
 
-    expect(addMdTag("ab\nc", "#", 3), "ab\n# c");
+    expect(addMdTag("ab\nc", MdTag.header, 3), "ab\n# c");
   });
 
-  test("addMdTag 箇条書き", () {
-    // expect(addMdTag("abc", "-", 1), "- abc");
-    expect(addMdTag("- abc", "-", 1), "  - abc");
+  test("mt.addMdTag 箇条書き", () {
+    // expect(mt.addMdTag("abc", "-", 1), "- abc");
+    expect(addMdTag("- abc", MdTag.unorderedList, 1), "  - abc");
   });
 }

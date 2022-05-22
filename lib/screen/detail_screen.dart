@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import '../domain/md_tagger.dart';
 import '../domain/ticket.dart';
 import '../shared/logger.dart';
 
@@ -63,16 +64,16 @@ class _DetailScreenState extends State<DetailScreen> {
     });
   }
 
-  void _setStateMdTag(String tag) {
+  void _setStateMdTag(MdTag tag) {
     setState(() {
-      var newCusorPosition = currentLineHeadPosition(
-          _bodyController.text, _bodyController.selection.start);
-      var text =
-          addMdTag(_bodyController.text, tag, _bodyController.selection.start);
+      var mdTagger = MdTagger(_bodyController.text, tag,
+          _bodyController.selection.start, _bodyController.selection.start);
+      var text = mdTagger.text;
       _bodyController.text = text;
+      markdown = text;
 
-      _bodyController.selection =
-          TextSelection.fromPosition(TextPosition(offset: newCusorPosition));
+      _bodyController.selection = TextSelection.fromPosition(
+          TextPosition(offset: mdTagger.currentLineHeadPosition));
     });
   }
 
@@ -113,55 +114,6 @@ class _DetailScreenState extends State<DetailScreen> {
       ),
     );
   }
-}
-
-int currentLineHeadPosition(String text, int cursorPosition) {
-  if (text.length < cursorPosition || cursorPosition < 0) {
-    throw Exception(
-        "Invalid cursorPosition: cursorPosition=$cursorPosition, textLength=${text.length}");
-  }
-  // カーソル位置までに現れる最後の改行
-  var textToCursorPosition = text.substring(0, cursorPosition);
-  var match = RegExp(r"[\s\S]*\n").firstMatch(textToCursorPosition);
-  if (match == null) {
-    // 改行がなければ文字列の先頭
-    return 0;
-  }
-
-  String matchText = match.group(0)!;
-  int lineHeadPosition = matchText.length;
-  var lines = textToCursorPosition.split("\n");
-  String lineText = lines[lines.length - 1];
-  int lineCount = lines.length;
-
-  return lineHeadPosition;
-}
-
-String addMdTag(String text, String tag, int cursorPosition) {
-  int addPosition = currentLineHeadPosition(text, cursorPosition);
-
-  var textToCursorPosition = text.substring(0, cursorPosition);
-  var cursorLineCount = textToCursorPosition.split("\n").length - 1;
-  String lineText = text.split("\n")[cursorLineCount];
-  var addTagText = "";
-  if (tag == "#") {
-    // 見出しタグ
-    var match = RegExp(r"^\" + tag + "+? ").firstMatch(lineText);
-    addTagText = match == null ? tag + " " : tag;
-  } else if (RegExp(r"^\" + tag + " ").firstMatch(lineText) != null) {
-    // 既に対象のタグがある
-    addTagText = "  ";
-  } else if (RegExp(r"^ {2,}\" + tag + " ").firstMatch(lineText) != null) {
-    // 既に対象のタグがありインデントされている
-    addTagText = "  ";
-  } else {
-    // 対象のタグがない
-    addTagText = tag + " ";
-  }
-
-  return text.substring(0, addPosition) +
-      addTagText +
-      text.substring(addPosition);
 }
 
 abstract class DetailScreenUiBuilder {
@@ -230,17 +182,12 @@ class _EditModeScreen extends DetailScreenUiBuilder {
                 OutlinedButton(
                     child: Text("見出し"),
                     onPressed: (() {
-                      parent._setStateMdTag("#");
+                      parent._setStateMdTag(MdTag.header);
                     })),
                 OutlinedButton(
-                    child: Text("・"),
+                    child: Text("箇条書き"),
                     onPressed: (() {
-                      parent._setStateMdTag("-");
-                    })),
-                OutlinedButton(
-                    child: Text("1."),
-                    onPressed: (() {
-                      parent._setStateMdTag("1.");
+                      parent._setStateMdTag(MdTag.unorderedList);
                     })),
               ]))
         ]));
