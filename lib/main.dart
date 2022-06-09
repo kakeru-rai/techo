@@ -10,14 +10,5 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  if (FirebaseAuth.instance.currentUser == null) {
-    await _signInWithAnonymous();
-  }
-
-  runApp(const MyApp());
-}
-
-Future<UserCredential> _signInWithAnonymous() async {
-  return FirebaseAuth.instance.signInAnonymously();
+  runApp(MyApp(FirebaseAuth.instance.currentUser == null));
 }
