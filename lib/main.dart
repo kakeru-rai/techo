@@ -10,5 +10,5 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp(FirebaseAuth.instance.currentUser == null));
+  runApp(MyApp(FirebaseAuth.instance.currentUser != null));
 }

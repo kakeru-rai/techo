@@ -81,8 +81,8 @@ class _ListScreenState extends State<ListScreen> {
     await FirebaseAuth.instance
         .signOut()
         .catchError((error) => logger.e(error));
-
-    Navigator.pushReplacementNamed(context, WelcomeScreen.routeName);
+    await _signInWithAnonymous();
+    _setStateInitView();
   }
 
   void _onLoginTapped(BuildContext context) async {
