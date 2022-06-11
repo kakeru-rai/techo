@@ -3,8 +3,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewScreen extends StatefulWidget {
   static const routeName = "WebViewScreen";
+  final Uri url;
+  final String? title;
 
-  const WebViewScreen({Key? key}) : super(key: key);
+  const WebViewScreen(this.url, {Key? key, this.title}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _WebViewScreen();
@@ -13,12 +15,13 @@ class WebViewScreen extends StatefulWidget {
 class _WebViewScreen extends State<WebViewScreen> {
   @override
   Widget build(BuildContext context) {
+    Uri.parse("");
     return Scaffold(
       appBar: AppBar(
-        title: const Text('利用規約'),
+        title: Text(widget.title ?? ""),
       ),
-      body: const WebView(
-        initialUrl: 'https://techo-dev-c2560.firebaseapp.com/term.html',
+      body: WebView(
+        initialUrl: widget.url.toString(),
       ),
     );
   }

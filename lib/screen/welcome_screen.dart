@@ -13,6 +13,8 @@ class WelcomeScreen extends StatefulWidget {
 }
 
 class _WelcomeScreen extends State<WelcomeScreen> {
+  bool _isAgree = false;
+
   onStartPressed() async {
     await _signInWithAnonymous();
   }
@@ -24,23 +26,51 @@ class _WelcomeScreen extends State<WelcomeScreen> {
       const Padding(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       ),
-      OutlinedButton(
-          onPressed: () async {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const WebViewScreen()),
-            );
-          },
-          child: const Text("利用規約")),
-      Checkbox(
-        onChanged: (bool? value) {},
-        value: false,
+      Text("sd\nsaf"),
+      TextButton(
+        child: const Text("利用規約"),
+        onPressed: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebViewScreen(
+                    Uri.parse(
+                        'https://techo-dev-c2560.firebaseapp.com/term.html'),
+                    title: "利用規約")),
+          );
+        },
+      ),
+      TextButton(
+        child: const Text("プライバシーポリシー"),
+        onPressed: () async {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => WebViewScreen(
+                    Uri.parse(
+                        'https://techo-dev-c2560.firebaseapp.com/privacy.html'),
+                    title: "プライバシーポリシー")),
+          );
+        },
+      ),
+      Row(
+        children: [
+          Checkbox(
+            onChanged: (bool? value) {
+              setState(() => {_isAgree = !_isAgree});
+            },
+            value: _isAgree,
+          ),
+          const Text("利用規約に同意する"),
+        ],
       ),
       OutlinedButton(
-          onPressed: () async {
-            await _signInWithAnonymous();
-            Navigator.pushReplacementNamed(context, ListScreen.routeName);
-          },
+          onPressed: _isAgree
+              ? () async {
+                  await _signInWithAnonymous();
+                  Navigator.pushReplacementNamed(context, ListScreen.routeName);
+                }
+              : null,
           child: const Text("はじめる")),
     ]));
   }
