@@ -157,6 +157,16 @@ class _ListScreenState extends State<ListScreen> {
                           onTap: () {
                             _onLogoutTapped();
                           }),
+                  ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('初期化'),
+                      onTap: () async {
+                        await FirebaseAuth.instance
+                            .signOut()
+                            .catchError((error) => logger.e(error));
+                        Navigator.pushReplacementNamed(
+                            context, WelcomeScreen.routeName);
+                      }),
                 ]),
           ),
           body: Column(children: [
