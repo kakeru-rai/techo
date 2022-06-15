@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
+import 'package:flutter_hello_world/screen/webview_screen.dart';
+import 'package:flutter_hello_world/screen/welcome_screen.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -82,7 +84,6 @@ class _ListScreenState extends State<ListScreen> {
         .catchError((error) => logger.e(error));
     await _signInWithAnonymous();
     _setStateInitView();
-    Navigator.pop(context);
   }
 
   void _onLoginTapped(BuildContext context) async {
@@ -157,6 +158,39 @@ class _ListScreenState extends State<ListScreen> {
                           onTap: () {
                             _onLogoutTapped();
                           }),
+                  ListTile(
+                      title: const Text('利用規約'),
+                      onTap: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => WebViewScreen(
+                                  Uri.parse(
+                                      'https://techo-dev-c2560.firebaseapp.com/term.html'),
+                                  title: "利用規約")),
+                        );
+                      }),
+                  ListTile(
+                      title: const Text('プライバシーポリシー'),
+                      onTap: () async {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => WebViewScreen(
+                                  Uri.parse(
+                                      'https://techo-dev-c2560.firebaseapp.com/privacy.html'),
+                                  title: "プライバシーポリシー")),
+                        );
+                      }),
+                  ListTile(
+                      title: const Text('初期化'),
+                      onTap: () async {
+                        await FirebaseAuth.instance
+                            .signOut()
+                            .catchError((error) => logger.e(error));
+                        Navigator.pushReplacementNamed(
+                            context, WelcomeScreen.routeName);
+                      }),
                 ]),
           ),
           body: Column(children: [
