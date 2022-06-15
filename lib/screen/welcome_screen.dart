@@ -22,12 +22,19 @@ class _WelcomeScreen extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(children: [
+        body: Center(
+            child: Column(mainAxisSize: MainAxisSize.max, children: [
       const Padding(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       ),
-      Text("sd\nsaf"),
+      const Spacer(flex: 1),
+      const Icon(Icons.emoji_objects_outlined, size: 60.0, color: Colors.grey),
+      const Icon(Icons.emoji_people_outlined, size: 100.0, color: Colors.grey),
+      const Spacer(flex: 1),
       TextButton(
+        style: const ButtonStyle(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: const Text("利用規約"),
         onPressed: () async {
           Navigator.push(
@@ -41,6 +48,9 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         },
       ),
       TextButton(
+        style: const ButtonStyle(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: const Text("プライバシーポリシー"),
         onPressed: () async {
           Navigator.push(
@@ -54,6 +64,7 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         },
       ),
       Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Checkbox(
             onChanged: (bool? value) {
@@ -72,7 +83,10 @@ class _WelcomeScreen extends State<WelcomeScreen> {
                 }
               : null,
           child: const Text("はじめる")),
-    ]));
+      const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 80),
+      ),
+    ])));
   }
 }
 
