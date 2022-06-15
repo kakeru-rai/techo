@@ -37,14 +37,7 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         ),
         child: const Text("利用規約"),
         onPressed: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebViewScreen(
-                    Uri.parse(
-                        'https://techo-dev-c2560.firebaseapp.com/term.html'),
-                    title: "利用規約")),
-          );
+          WebViewScreenNavigation.pushTerm(context);
         },
       ),
       TextButton(
@@ -53,14 +46,7 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         ),
         child: const Text("プライバシーポリシー"),
         onPressed: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebViewScreen(
-                    Uri.parse(
-                        'https://techo-dev-c2560.firebaseapp.com/privacy.html'),
-                    title: "プライバシーポリシー")),
-          );
+          WebViewScreenNavigation.pushPrivacy(context);
         },
       ),
       Row(

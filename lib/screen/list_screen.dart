@@ -58,13 +58,11 @@ class _ListScreenState extends State<ListScreen> {
   void _onListItemTapped(BuildContext context, int index) async {
     // 返り値を変数に入れないと待ってくれないので
     // ignore: unused_local_variable
-    var result = await Navigator.push<Ticket>(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DetailScreen(
-                ticket: _items[index],
-              )),
-    );
+    Ticket? result = await DetailScreenNavigation.push(context, _items[index]);
+
+    if (result != null) {
+      _items[index] = result;
+    }
 
     _setStateInitView();
   }
@@ -161,26 +159,12 @@ class _ListScreenState extends State<ListScreen> {
                   ListTile(
                       title: const Text('利用規約'),
                       onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => WebViewScreen(
-                                  Uri.parse(
-                                      'https://techo-dev-c2560.firebaseapp.com/term.html'),
-                                  title: "利用規約")),
-                        );
+                        WebViewScreenNavigation.pushTerm(context);
                       }),
                   ListTile(
                       title: const Text('プライバシーポリシー'),
                       onTap: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => WebViewScreen(
-                                  Uri.parse(
-                                      'https://techo-dev-c2560.firebaseapp.com/privacy.html'),
-                                  title: "プライバシーポリシー")),
-                        );
+                        WebViewScreenNavigation.pushPrivacy(context);
                       }),
                   ListTile(
                       title: const Text('初期化'),
