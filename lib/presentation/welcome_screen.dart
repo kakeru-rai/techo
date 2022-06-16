@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hello_world/screen/list_screen.dart';
-import 'package:flutter_hello_world/screen/webview_screen.dart';
+import 'package:flutter_hello_world/presentation/list_screen.dart';
+import 'package:flutter_hello_world/presentation/webview_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const routeName = "WelcomeScreen";
