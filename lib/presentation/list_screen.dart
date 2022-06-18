@@ -4,15 +4,13 @@ import 'package:flutter_hello_world/domain/ticket_repository.dart';
 import 'package:flutter_hello_world/presentation/webview_screen.dart';
 import 'package:flutter_hello_world/presentation/welcome_screen.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
+import '../infrastructure/firebase_auth_adapter.dart';
 import 'detail_screen.dart';
 import '../domain/ticket.dart';
-
-import '../shared/logger.dart';
+import 'login_user.dart';
 
 class ListScreen extends StatefulWidget {
-  static const routeName = "list";
+  static const routeName = "ListScreen";
 
   const ListScreen({Key? key}) : super(key: key);
 
@@ -22,8 +20,8 @@ class ListScreen extends StatefulWidget {
 
 class _ListScreenState extends State<ListScreen> {
   List<Ticket> _items = [];
-  String _userName = "";
-  User _currentUser = FirebaseAuth.instance.currentUser!;
+  LoginUser _loginUser =
+      LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
   late TextEditingController _titleController;
 
   @override
@@ -77,42 +75,27 @@ class _ListScreenState extends State<ListScreen> {
   }
 
   void _onLogoutTapped() async {
-    await FirebaseAuth.instance
-        .signOut()
-        .catchError((error) => logger.e(error));
-    await _signInWithAnonymous();
+    await FirebaseAuthAdapter.signOut();
+    await FirebaseAuthAdapter.signInWithAnonymous();
     _setStateInitView();
   }
 
   void _onLoginTapped(BuildContext context) async {
-    logger.d("login");
-    UserCredential userCredential =
-        await _signInWithGoogle(FirebaseAuth.instance.currentUser);
-    if (userCredential.user != null) {
+    bool isLoginSucceeded = await FirebaseAuthAdapter.signInWithGoogle();
+    if (isLoginSucceeded) {
       Navigator.pop(context);
       _setStateInitView();
     }
   }
 
   Future<void> _setStateInitView() async {
-    _currentUser = FirebaseAuth.instance.currentUser!;
+    _loginUser = LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
     _items = await _getList();
-    _userName = _getUserName();
     setState(() {});
   }
 
   Future<List<Ticket>> _getList() async {
     return TicketRepository().getList();
-  }
-
-  String _getUserName() {
-    if (_currentUser.isAnonymous) {
-      return "匿名ユーザーさん";
-    } else if (_currentUser.email != null && _currentUser.email!.isNotEmpty) {
-      return _currentUser.email!;
-    } else {
-      return "新規ユーザーさん";
-    }
   }
 
   @override
@@ -135,15 +118,15 @@ class _ListScreenState extends State<ListScreen> {
                     child: Column(
                       children: [
                         Icon(
-                            _currentUser.isAnonymous
+                            _loginUser.isAnonymous
                                 ? Icons.account_circle
                                 : Icons.face,
                             size: 80.0),
-                        Text(_userName),
+                        Text(_loginUser.userName),
                       ],
                     ),
                   ),
-                  _currentUser.isAnonymous
+                  _loginUser.isAnonymous
                       ? SignInButton(
                           Buttons.Google,
                           onPressed: () {
@@ -169,9 +152,7 @@ class _ListScreenState extends State<ListScreen> {
                   ListTile(
                       title: const Text('初期化'),
                       onTap: () async {
-                        await FirebaseAuth.instance
-                            .signOut()
-                            .catchError((error) => logger.e(error));
+                        await FirebaseAuthAdapter.signOut();
                         Navigator.pushReplacementNamed(
                             context, WelcomeScreen.routeName);
                       }),
@@ -243,49 +224,6 @@ class _ListScreenState extends State<ListScreen> {
           ]),
         ));
   }
-}
-
-Future<UserCredential> _signInWithAnonymous() async {
-  return FirebaseAuth.instance.signInAnonymously();
-}
-
-Future<UserCredential> _signInWithGoogle(User? currentUserForBind) async {
-  // Trigger the authentication flow
-  final GoogleSignInAccount? googleUser = await GoogleSignIn(
-    scopes: [
-      'email',
-    ],
-  ).signIn();
-
-  // Obtain the auth details from the request
-  final GoogleSignInAuthentication? googleAuth =
-      await googleUser?.authentication;
-
-  // Create a new credential
-  final credential = GoogleAuthProvider.credential(
-    accessToken: googleAuth?.accessToken,
-    idToken: googleAuth?.idToken,
-  );
-
-  UserCredential userCredential;
-  if (currentUserForBind != null) {
-    try {
-      // Google認証アカウントを作成して匿名アカウントのデータを引き継ぐ
-      userCredential = await currentUserForBind.linkWithCredential(credential);
-    } catch (e) {
-      logger.i(e.toString());
-      // すでに該当ユーザーのGoogle認証アカウントがある場合は既存アカウントでログインする
-      // 匿名アカウントで作業中のデータは破棄される
-      // [firebase_auth/credential-already-in-use] This credential is already associated with a different user account.
-      userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
-    }
-  } else {
-    userCredential =
-        await FirebaseAuth.instance.signInWithCredential(credential);
-  }
-
-  return userCredential;
 }
 
 void _updateSort(List<Ticket> _items) {
