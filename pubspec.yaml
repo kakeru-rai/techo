@@ -42,6 +42,7 @@ dependencies:
   flutter_signin_button: ^2.0.0
   derry: ^1.4.3
   webview_flutter: ^3.0.4
+  hooks_riverpod: ^1.0.4
 
 dev_dependencies:
   flutter_test:
