@@ -4,14 +4,22 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../domain/md_tagger.dart';
 import '../domain/ticket.dart';
-import '../shared/logger.dart';
 
 class DetailScreen extends StatefulWidget {
+  static const String routeName = "DetailScreen";
+
   const DetailScreen({Key? key, required this.ticket}) : super(key: key);
   final Ticket ticket;
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
+}
+
+extension DetailScreenNavigation on DetailScreen {
+  static Future<Ticket?> push(BuildContext context, Ticket ticket) async {
+    return Navigator.pushNamed<Ticket?>(context, DetailScreen.routeName,
+        arguments: ticket);
+  }
 }
 
 class _DetailScreenState extends State<DetailScreen> {
@@ -26,6 +34,7 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   void initState() {
     super.initState();
+
     markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
     _titleController.addListener(() {
@@ -79,7 +88,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _pop() {
     _save();
-    Navigator.pop(context);
+    Navigator.pop(context, widget.ticket);
   }
 
   @override

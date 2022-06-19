@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hello_world/screen/list_screen.dart';
-import 'package:flutter_hello_world/screen/webview_screen.dart';
+import 'package:flutter_hello_world/presentation/list_screen.dart';
+import 'package:flutter_hello_world/presentation/webview_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   static const routeName = "WelcomeScreen";
@@ -37,14 +37,7 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         ),
         child: const Text("利用規約"),
         onPressed: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebViewScreen(
-                    Uri.parse(
-                        'https://techo-dev-c2560.firebaseapp.com/term.html'),
-                    title: "利用規約")),
-          );
+          WebViewScreenNavigation.pushTerm(context);
         },
       ),
       TextButton(
@@ -53,14 +46,7 @@ class _WelcomeScreen extends State<WelcomeScreen> {
         ),
         child: const Text("プライバシーポリシー"),
         onPressed: () async {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => WebViewScreen(
-                    Uri.parse(
-                        'https://techo-dev-c2560.firebaseapp.com/privacy.html'),
-                    title: "プライバシーポリシー")),
-          );
+          WebViewScreenNavigation.pushPrivacy(context);
         },
       ),
       Row(
