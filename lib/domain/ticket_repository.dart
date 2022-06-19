@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_hello_world/domain/ticket.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../shared/logger.dart';
+import 'ticket.dart';
 
 class TicketRepository {
   Future<List<Ticket>> getList() async {

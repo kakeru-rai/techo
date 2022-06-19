@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hello_world/domain/ticket_repository.dart';
-import 'package:flutter_hello_world/presentation/webview_screen.dart';
-import 'package:flutter_hello_world/presentation/welcome_screen.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
-import '../infrastructure/firebase_auth_adapter.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../domain/ticket.dart';
+import '../../domain/ticket_repository.dart';
+import '../../infrastructure/firebase_auth_adapter.dart';
+import '../login_user.dart';
 import 'detail_screen.dart';
-import '../domain/ticket.dart';
-import 'login_user.dart';
+import 'webview_screen.dart';
+import 'welcome_screen.dart';
 
-class ListScreen extends StatefulWidget {
+class ListScreen extends StatefulHookConsumerWidget {
   static const routeName = "ListScreen";
 
   const ListScreen({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _ListScreenState();
+  _ListScreenState createState() => _ListScreenState();
 }
 
-class _ListScreenState extends State<ListScreen> {
+class _ListScreenState extends ConsumerState<ListScreen> {
   List<Ticket> _items = [];
   LoginUser _loginUser =
       LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../domain/md_tagger.dart';
-import '../domain/ticket.dart';
+import '../../domain/md_tagger.dart';
+import '../../domain/ticket.dart';
 
-class DetailScreen extends StatefulWidget {
+class DetailScreen extends StatefulHookConsumerWidget {
   static const String routeName = "DetailScreen";
 
   const DetailScreen({Key? key, required this.ticket}) : super(key: key);
   final Ticket ticket;
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  ConsumerState createState() => _DetailScreenState();
 }
 
 extension DetailScreenNavigation on DetailScreen {
@@ -22,7 +23,7 @@ extension DetailScreenNavigation on DetailScreen {
   }
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _DetailScreenState extends ConsumerState<DetailScreen> {
   _DetailScreenState();
 
   late DetailScreenUiBuilder _uiBuilder;

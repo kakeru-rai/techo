@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hello_world/presentation/detail_screen.dart';
-import 'package:flutter_hello_world/presentation/webview_screen.dart';
-import 'package:flutter_hello_world/presentation/welcome_screen.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'domain/ticket.dart';
-import 'presentation/list_screen.dart';
+import 'presentation/screen/detail_screen.dart';
+import 'presentation/screen/list_screen.dart';
+import 'presentation/screen/webview_screen.dart';
+import 'presentation/screen/welcome_screen.dart';
 
-class MyApp extends StatelessWidget {
+class MyApp extends HookConsumerWidget {
   final bool isLoggedIn;
   const MyApp(this.isLoggedIn, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(primarySwatch: Colors.blue),
