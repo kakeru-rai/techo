@@ -15,21 +15,25 @@ class TicketRepository {
     return Future<List<Ticket>>.value(tickets);
   }
 
-  Future<void> upsert(Ticket ticket) async {
+  Future<Ticket> upsert(Ticket ticket) async {
     if (ticket.id.isEmpty) {
-      await _insert(ticket);
+      return await _insert(ticket);
     } else {
-      await _update(ticket);
+      return await _update(ticket);
     }
   }
 
-  Future<void> _update(Ticket ticket) async {
+  Future<Ticket> _update(Ticket ticket) async {
     await _ticketCollection().doc(ticket.id).set(ticket);
+    return ticket.copyWith();
   }
 
-  Future<void> _insert(Ticket ticket) async {
-    await _ticketCollection().add(ticket).then((value) => ticket.id = value.id);
-    return;
+  Future<Ticket> _insert(Ticket ticket) async {
+    Ticket? newTicket;
+    await _ticketCollection()
+        .add(ticket)
+        .then((value) => {value.get().then((v) => newTicket = v.data())});
+    return newTicket!;
   }
 
   Future<void> delete(Ticket ticket) async {

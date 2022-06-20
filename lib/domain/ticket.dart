@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Ticket {
-  String id;
+  final String id;
 
-  String title;
+  final String title;
 
-  String body;
+  final String body;
 
-  int sort = 0;
+  final int sort;
 
-  Ticket(this.id, this.title, this.body, this.sort);
+  Ticket(
+      {required this.id,
+      required this.title,
+      required this.body,
+      required this.sort});
 
   @override
   String toString() {
@@ -24,9 +28,21 @@ class Ticket {
     };
   }
 
+  Ticket copyWith({String? id, String? title, String? body, int? sort}) {
+    return Ticket(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      body: body ?? this.body,
+      sort: sort ?? this.sort,
+    );
+  }
+
   static Ticket fromFirestoreSnapshot(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    return Ticket(snapshot.id, snapshot.get("title"), snapshot.get("body"),
-        snapshot.data()!.containsKey("sort") ? snapshot.get("sort") : 0);
+    return Ticket(
+        id: snapshot.id,
+        title: snapshot.get("title"),
+        body: snapshot.get("body"),
+        sort: snapshot.data()!.containsKey("sort") ? snapshot.get("sort") : 0);
   }
 }

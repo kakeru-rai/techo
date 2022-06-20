@@ -9,6 +9,58 @@ import 'detail_screen.dart';
 import 'webview_screen.dart';
 import 'welcome_screen.dart';
 
+class TicketNotifier extends StateNotifier<List<Ticket>> {
+  TicketNotifier() : super([]);
+
+  void getList(List<Ticket> tickets) {
+    state = tickets;
+  }
+
+  void delete(Ticket ticket) {
+    var newItems = [
+      for (final aTicket in state)
+        if (ticket.id != aTicket.id) aTicket,
+    ];
+    state = _updateSort(newItems);
+  }
+
+  void insert(String title) {
+    var newItems = [Ticket(id: "", title: title, body: "", sort: 0), ...state];
+    state = _updateSort(newItems);
+  }
+
+  void reorder(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    var newItems = [...state];
+    final Ticket item = newItems.removeAt(oldIndex);
+    newItems.insert(newIndex, item);
+
+    state = _updateSort(newItems);
+  }
+
+  List<Ticket> _updateSort(List<Ticket> _items) {
+    List<Ticket> newItems = [];
+    int lastIndex = _items.length - 1;
+    _items.asMap().forEach((index, ticket) {
+      int newSort = lastIndex - index;
+      if (ticket.sort == newSort) {
+        return;
+      }
+      newItems.add(ticket.copyWith(sort: newSort));
+    });
+    newItems.sort((a, b) {
+      return a.sort - b.sort;
+    });
+    return [..._items];
+  }
+}
+
+final _itemsProvider =
+    StateNotifierProvider.autoDispose<TicketNotifier, List<Ticket>>(
+        (ref) => TicketNotifier());
+
 class ListScreen extends StatefulHookConsumerWidget {
   static const routeName = "ListScreen";
 
@@ -19,7 +71,6 @@ class ListScreen extends StatefulHookConsumerWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  List<Ticket> _items = [];
   LoginUser _loginUser =
       LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
   late TextEditingController _titleController;
@@ -30,7 +81,9 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
     _titleController = TextEditingController();
     Future(() async {
-      await _setStateInitView();
+      ref
+          .read(_itemsProvider.notifier)
+          .getList(await TicketRepository().getList());
     });
   }
 
@@ -45,33 +98,37 @@ class _ListScreenState extends ConsumerState<ListScreen> {
       return;
     }
 
-    setState(() {
-      _items.insert(0, Ticket("", _titleController.text, "", 0));
-      _updateSort(_items);
+    ref.read(_itemsProvider.notifier).insert(_titleController.text);
+    _updateSort(ref.read(_itemsProvider));
 
-      _titleController.text = "";
-    });
+    _titleController.text = "";
   }
 
   void _onListItemTapped(BuildContext context, int index) async {
     // 返り値を変数に入れないと待ってくれないので
     // ignore: unused_local_variable
-    Ticket? result = await DetailScreenNavigation.push(context, _items[index]);
 
-    if (result != null) {
-      _items[index] = result;
-    }
+    // Ticket? result = await DetailScreenNavigation.push(context, _items[index]);
+
+    // if (result != null) {
+    //   _items[index] = result;
+    // }
 
     _setStateInitView();
   }
 
-  void _onListItemDeleteTapped(int itemIndex) async {
-    await TicketRepository().delete(_items[itemIndex]);
+  void _onListItemDeleteTapped(Ticket ticket) async {
+    await TicketRepository().delete(ticket);
 
-    _items.removeAt(itemIndex);
-    _updateSort(_items);
+    ref.read(_itemsProvider.notifier).delete(ticket);
+    _updateSort(ref.read(_itemsProvider));
 
     _setStateInitView();
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    ref.read(_itemsProvider.notifier).reorder(oldIndex, newIndex);
+    _updateSort(ref.read(_itemsProvider));
   }
 
   void _onLogoutTapped() async {
@@ -90,16 +147,12 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
   Future<void> _setStateInitView() async {
     _loginUser = LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
-    _items = await _getList();
-    setState(() {});
-  }
-
-  Future<List<Ticket>> _getList() async {
-    return TicketRepository().getList();
   }
 
   @override
   Widget build(BuildContext context) {
+    final _items = ref.watch<List<Ticket>>(_itemsProvider);
+
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
@@ -172,21 +225,12 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: () {
-                          _onListItemDeleteTapped(index);
+                          _onListItemDeleteTapped(_items[index]);
                         },
                       ),
                     )
                 ],
-                onReorder: (int oldIndex, int newIndex) {
-                  setState(() {
-                    if (oldIndex < newIndex) {
-                      newIndex -= 1;
-                    }
-                    final Ticket item = _items.removeAt(oldIndex);
-                    _items.insert(newIndex, item);
-                    _updateSort(_items);
-                  });
-                },
+                onReorder: _onReorder,
               ),
             ),
             Container(
@@ -233,7 +277,6 @@ void _updateSort(List<Ticket> _items) {
     if (ticket.sort == newSort) {
       return;
     }
-    ticket.sort = newSort;
-    TicketRepository().upsert(ticket);
+    TicketRepository().upsert(ticket.copyWith(sort: newSort));
   });
 }

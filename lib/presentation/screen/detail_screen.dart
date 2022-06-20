@@ -39,7 +39,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     markdown = widget.ticket.body;
     _titleController = TextEditingController(text: widget.ticket.title);
     _titleController.addListener(() {
-      widget.ticket.title = _titleController.text;
+      widget.ticket.copyWith(title: _titleController.text);
     });
 
     _bodyController = TextEditingController(text: widget.ticket.body);
@@ -48,8 +48,8 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   }
 
   void _save() async {
-    widget.ticket.title = _titleController.text;
-    widget.ticket.body = _bodyController.text;
+    widget.ticket
+        .copyWith(title: _titleController.text, body: _bodyController.text);
     await TicketRepository().upsert(widget.ticket);
   }
 
