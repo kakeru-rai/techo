@@ -30,9 +30,8 @@ class TicketRepository {
 
   Future<Ticket> _insert(Ticket ticket) async {
     Ticket? newTicket;
-    await _ticketCollection()
-        .add(ticket)
-        .then((value) => {value.get().then((v) => newTicket = v.data())});
+    await _ticketCollection().add(ticket).then((DocumentReference value) =>
+        {newTicket = ticket.copyWith(id: value.id)});
     return newTicket!;
   }
 
