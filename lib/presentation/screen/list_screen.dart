@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../domain/ticket.dart';
@@ -24,25 +25,16 @@ class ListScreen extends StatefulHookConsumerWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  late TextEditingController _titleController;
-
   @override
   void initState() {
     super.initState();
     _setLoginUserState(FirebaseAuthAdapter.getUser()!);
-    _titleController = TextEditingController();
     Future(() async {
       await _fetchTickets();
     });
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  void _onTicketAddTapped() async {
+  void _onTicketAddTapped(TextEditingController _titleController) async {
     if (_titleController.text.isEmpty) {
       return;
     }
@@ -105,6 +97,8 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   Widget build(BuildContext context) {
     final tickets = ref.watch<List<Ticket>>(ticketsProvider);
     final loginUser = ref.watch(loginUserProvider);
+
+    final _titleController = useTextEditingController();
 
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -200,7 +194,8 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                         child: Row(children: [
                           Expanded(
                               child: TextField(
-                            onEditingComplete: _onTicketAddTapped,
+                            onEditingComplete: () =>
+                                {_onTicketAddTapped(_titleController)},
                             autofocus: false,
                             controller: _titleController,
                             style: const TextStyle(fontSize: 14),
@@ -215,7 +210,8 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                           )),
                           IconButton(
                             icon: const Icon(Icons.add),
-                            onPressed: _onTicketAddTapped,
+                            onPressed: () =>
+                                {_onTicketAddTapped(_titleController)},
                           )
                         ]))))
           ]),
