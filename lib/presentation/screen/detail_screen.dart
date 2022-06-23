@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
-import 'package:flutter_hello_world/presentation/screen/ticket_provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../domain/md_tagger.dart';
 import '../../domain/ticket.dart';
+import 'tickets_provider.dart';
 
 class DetailScreen extends StatefulHookConsumerWidget {
   static const String routeName = "DetailScreen";
@@ -64,7 +64,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
   void _save() async {
     Ticket ticketState = ref.read(ticketProvider.notifier).state;
     await TicketRepository().upsert(ticketState);
-    ref.read(ticketListProvider.notifier).update(ticketState.copyWith());
+    ref.read(ticketsProvider.notifier).update(ticketState.copyWith());
   }
 
   void _onBodyChanged(String text) {
