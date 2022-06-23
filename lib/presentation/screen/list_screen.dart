@@ -7,7 +7,7 @@ import '../../domain/ticket_repository.dart';
 import '../../infrastructure/firebase_auth_adapter.dart';
 import '../login_user.dart';
 import 'detail_screen.dart';
-import 'ticket_provider.dart';
+import 'tickets_provider.dart';
 import 'webview_screen.dart';
 import 'welcome_screen.dart';
 
@@ -24,8 +24,6 @@ class ListScreen extends StatefulHookConsumerWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  // LoginUser _loginUser =
-  //     LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
   late TextEditingController _titleController;
 
   @override
@@ -53,29 +51,27 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     _titleController.text = "";
     var newTicket = await TicketRepository()
         .upsert(Ticket(id: "", title: title, body: "", sort: 0));
-    ref.read(ticketListProvider.notifier).insert(newTicket);
-    _updateSort(ref.read(ticketListProvider));
+    ref.read(ticketsProvider.notifier).insert(newTicket);
+    _updateSort(ref.read(ticketsProvider));
   }
 
   void _onListItemTapped(BuildContext context, int index) async {
-    // 返り値を変数に入れないと待ってくれないので
-    // ignore: unused_local_variable
     await DetailScreenNavigation.push(
-        context, ref.read(ticketListProvider)[index]);
+        context, ref.read(ticketsProvider)[index]);
   }
 
   void _onListItemDeleteTapped(Ticket ticket) async {
     await TicketRepository().delete(ticket);
 
-    ref.read(ticketListProvider.notifier).delete(ticket);
-    _updateSort(ref.read(ticketListProvider));
+    ref.read(ticketsProvider.notifier).delete(ticket);
+    _updateSort(ref.read(ticketsProvider));
 
     _setLoginUserState(FirebaseAuthAdapter.getUser()!);
   }
 
   void _onReorder(int oldIndex, int newIndex) {
-    ref.read(ticketListProvider.notifier).reorder(oldIndex, newIndex);
-    _updateSort(ref.read(ticketListProvider));
+    ref.read(ticketsProvider.notifier).reorder(oldIndex, newIndex);
+    _updateSort(ref.read(ticketsProvider));
   }
 
   void _onLogoutTapped() async {
@@ -101,13 +97,13 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
   Future<void> _fetchTickets() async {
     ref
-        .read(ticketListProvider.notifier)
+        .read(ticketsProvider.notifier)
         .setList(await TicketRepository().getList());
   }
 
   @override
   Widget build(BuildContext context) {
-    final _items = ref.watch<List<Ticket>>(ticketListProvider);
+    final tickets = ref.watch<List<Ticket>>(ticketsProvider);
     final loginUser = ref.watch(loginUserProvider);
 
     return GestureDetector(
@@ -172,17 +168,17 @@ class _ListScreenState extends ConsumerState<ListScreen> {
             Expanded(
               child: ReorderableListView(
                 children: <Widget>[
-                  for (int index = 0; index < _items.length; ++index)
+                  for (int index = 0; index < tickets.length; ++index)
                     ListTile(
-                      key: Key(_items[index].id),
+                      key: Key(tickets[index].id),
                       onTap: () {
                         _onListItemTapped(context, index);
                       },
-                      title: Text(_items[index].title),
+                      title: Text(tickets[index].title),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete),
                         onPressed: () {
-                          _onListItemDeleteTapped(_items[index]);
+                          _onListItemDeleteTapped(tickets[index]);
                         },
                       ),
                     )

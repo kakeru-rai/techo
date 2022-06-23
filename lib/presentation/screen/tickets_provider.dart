@@ -2,8 +2,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../domain/ticket.dart';
 
-class TicketNotifier extends StateNotifier<List<Ticket>> {
-  TicketNotifier() : super([]);
+class TicketsNotifier extends StateNotifier<List<Ticket>> {
+  TicketsNotifier() : super([]);
 
   void setList(List<Ticket> tickets) {
     state = tickets;
@@ -62,5 +62,5 @@ class TicketNotifier extends StateNotifier<List<Ticket>> {
   }
 }
 
-final ticketListProvider = StateNotifierProvider<TicketNotifier, List<Ticket>>(
-    (ref) => TicketNotifier());
+final ticketsProvider = StateNotifierProvider<TicketsNotifier, List<Ticket>>(
+    (ref) => TicketsNotifier());
