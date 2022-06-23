@@ -32,7 +32,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     Future(() async {
       ref
           .read(ticketListProvider.notifier)
-          .getList(await TicketRepository().getList());
+          .setList(await TicketRepository().getList());
     });
   }
 
@@ -58,14 +58,8 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   void _onListItemTapped(BuildContext context, int index) async {
     // 返り値を変数に入れないと待ってくれないので
     // ignore: unused_local_variable
-
-    // Ticket? result = await DetailScreenNavigation.push(context, _items[index]);
-
-    // if (result != null) {
-    //   _items[index] = result;
-    // }
-
-    _setStateInitView();
+    await DetailScreenNavigation.push(
+        context, ref.read(ticketListProvider)[index]);
   }
 
   void _onListItemDeleteTapped(Ticket ticket) async {

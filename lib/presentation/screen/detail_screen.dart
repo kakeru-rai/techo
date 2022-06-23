@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hello_world/domain/ticket_repository.dart';
+import 'package:flutter_hello_world/presentation/screen/ticket_provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
@@ -23,40 +24,51 @@ extension DetailScreenNavigation on DetailScreen {
   }
 }
 
+final isPreviewProvider = StateProvider.autoDispose<bool>((ref) {
+  return true;
+});
+
+final markdownProvider = StateProvider.autoDispose<String>((ref) {
+  return "";
+});
+
+final ticketProvider = StateProvider.autoDispose<Ticket>((ref) {
+  return Ticket.nullTicket();
+});
+
 class _DetailScreenState extends ConsumerState<DetailScreen> {
   _DetailScreenState();
 
-  late DetailScreenUiBuilder _uiBuilder;
   late TextEditingController _titleController;
   late TextEditingController _bodyController;
-  String markdown = "";
-  bool _isPreview = true;
 
   @override
   void initState() {
     super.initState();
+    Ticket ticketState =
+        ref.read(ticketProvider.notifier).state = widget.ticket;
+    ref.read(markdownProvider.notifier).state = ticketState.body;
 
-    markdown = widget.ticket.body;
-    _titleController = TextEditingController(text: widget.ticket.title);
+    _titleController = TextEditingController(text: ticketState.title);
     _titleController.addListener(() {
-      widget.ticket.copyWith(title: _titleController.text);
+      ref.read(ticketProvider.notifier).state =
+          ticketState.copyWith(title: _titleController.text);
     });
 
-    _bodyController = TextEditingController(text: widget.ticket.body);
-    _isPreview = widget.ticket.body.isEmpty ? false : true;
-    _uiBuilder = _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
+    _bodyController = TextEditingController(text: ticketState.body);
+
+    ref.read(isPreviewProvider.notifier).state =
+        ticketState.body.isEmpty ? false : true;
   }
 
   void _save() async {
-    widget.ticket
-        .copyWith(title: _titleController.text, body: _bodyController.text);
-    await TicketRepository().upsert(widget.ticket);
+    Ticket ticketState = ref.read(ticketProvider.notifier).state;
+    await TicketRepository().upsert(ticketState);
+    ref.read(ticketListProvider.notifier).update(ticketState.copyWith());
   }
 
   void _onBodyChanged(String text) {
-    setState(() {
-      markdown = text;
-    });
+    ref.read(markdownProvider.notifier).state = text;
   }
 
   @override
@@ -66,61 +78,65 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
     super.dispose();
   }
 
-  void _setStatePreview(bool isPreview) {
-    setState(() {
-      _isPreview = isPreview;
-      _uiBuilder =
-          _isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
-    });
+  void _setPreviewState(bool isPreview) {
+    ref.read(isPreviewProvider.notifier).state = isPreview;
   }
 
-  void _setStateMdTag(MdTag tag) {
-    setState(() {
-      var mdTagger = MdTagger(_bodyController.text, tag,
-          _bodyController.selection.start, _bodyController.selection.start);
-      var text = mdTagger.text;
-      _bodyController.text = text;
-      markdown = text;
+  void _setMdTextStateByMdTag(MdTag tag) {
+    var mdTagger = MdTagger(_bodyController.text, tag,
+        _bodyController.selection.start, _bodyController.selection.start);
+    var text = mdTagger.text;
+    _bodyController.text = text;
+    ref.read(markdownProvider.notifier).state = text;
 
-      _bodyController.selection = TextSelection.fromPosition(
-          TextPosition(offset: mdTagger.currentLineHeadPosition));
-    });
+    _bodyController.selection = TextSelection.fromPosition(
+        TextPosition(offset: mdTagger.currentLineHeadPosition));
   }
 
   void _pop() {
     _save();
-    Navigator.pop(context, widget.ticket);
+    Navigator.pop(context);
+  }
+
+  Future<bool> _onWillPop(bool isPreview) {
+    if (Navigator.of(context).userGestureInProgress) {
+      // iosの戻るジェスチャー
+      _pop();
+      return Future.value(false);
+    }
+    // iosの戻るジェスチャー意外 == Androidのバックキー
+    if (isPreview) {
+      _pop();
+      return Future.value(false);
+    } else {
+      _setPreviewState(true);
+      return Future.value(false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isPreview = ref.watch(isPreviewProvider);
+    DetailScreenUiBuilder _uiBuilder =
+        isPreview ? _PreviewModeScreen(this) : _EditModeScreen(this);
+    String markdown = ref.watch(markdownProvider);
+    Ticket ticketState = ref.watch(ticketProvider.notifier).state;
+
     return WillPopScope(
       // ユーザー操作による「戻る」操作
       onWillPop: () {
-        if (Navigator.of(context).userGestureInProgress) {
-          // iosの戻るジェスチャー
-          _save();
-          return Future.value(true);
-        }
-        // iosの戻るジェスチャー意外 == Androidのバックキー
-        if (_isPreview) {
-          _save();
-          return Future.value(true);
-        } else {
-          _setStatePreview(true);
-          return Future.value(false);
-        }
+        return _onWillPop(isPreview);
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.ticket.title),
+          title: Text(ticketState.title),
           leading: Builder(
             builder: (BuildContext context) {
               return _uiBuilder.appBarLeadingIconButton();
             },
           ),
         ),
-        body: _uiBuilder.scaffoldBody(),
+        body: _uiBuilder.scaffoldBody(markdown),
       ),
     );
   }
@@ -128,7 +144,7 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
 abstract class DetailScreenUiBuilder {
   Widget appBarLeadingIconButton();
-  Widget scaffoldBody();
+  Widget scaffoldBody(String markdown);
 }
 
 class _EditModeScreen extends DetailScreenUiBuilder {
@@ -140,13 +156,13 @@ class _EditModeScreen extends DetailScreenUiBuilder {
     return IconButton(
       icon: const Icon(Icons.check),
       onPressed: () {
-        parent._setStatePreview(true);
+        parent._setPreviewState(true);
       },
     );
   }
 
   @override
-  Widget scaffoldBody() {
+  Widget scaffoldBody(String markdown) {
     return Container(
         color: Colors.grey[100],
         child: Column(children: [
@@ -192,12 +208,12 @@ class _EditModeScreen extends DetailScreenUiBuilder {
                 OutlinedButton(
                     child: const Text("見出し"),
                     onPressed: (() {
-                      parent._setStateMdTag(MdTag.header);
+                      parent._setMdTextStateByMdTag(MdTag.header);
                     })),
                 OutlinedButton(
                     child: const Text("箇条書き"),
                     onPressed: (() {
-                      parent._setStateMdTag(MdTag.unorderedList);
+                      parent._setMdTextStateByMdTag(MdTag.unorderedList);
                     })),
               ]))
         ]));
@@ -219,23 +235,23 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
   }
 
   @override
-  Widget scaffoldBody() {
+  Widget scaffoldBody(String markdown) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: GestureDetector(
             onTap: () {
-              parent._setStatePreview(false);
+              parent._setPreviewState(false);
             },
-            child: parent.markdown.isEmpty
+            child: markdown.isEmpty
                 ? const Text("まだ何も入力されていません。タップして入力を開始。",
                     style: TextStyle(color: Colors.black26))
                 : Markdown(
-                    data: parent.markdown,
+                    data: markdown,
                     selectable: true,
                     shrinkWrap: true,
                     softLineBreak: true,
                     onTapText: () {
-                      parent._setStatePreview(false);
+                      parent._setPreviewState(false);
                     },
                   )));
   }

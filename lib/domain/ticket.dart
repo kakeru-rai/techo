@@ -15,6 +15,12 @@ class Ticket {
       required this.body,
       required this.sort});
 
+  Ticket.nullTicket()
+      : id = "",
+        title = "",
+        body = "",
+        sort = 0;
+
   @override
   String toString() {
     return "$id:$title:$body";

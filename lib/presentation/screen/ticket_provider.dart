@@ -5,7 +5,7 @@ import '../../domain/ticket.dart';
 class TicketNotifier extends StateNotifier<List<Ticket>> {
   TicketNotifier() : super([]);
 
-  void getList(List<Ticket> tickets) {
+  void setList(List<Ticket> tickets) {
     state = tickets;
   }
 
@@ -20,6 +20,18 @@ class TicketNotifier extends StateNotifier<List<Ticket>> {
   void insert(Ticket ticket) {
     var newItems = [ticket, ...state];
     state = _updateSort(newItems);
+  }
+
+  void update(Ticket ticket) {
+    List<Ticket> tickets = [];
+    state.asMap().forEach((index, Ticket aTicket) {
+      if (aTicket.id == ticket.id) {
+        tickets.add(ticket.copyWith());
+      } else {
+        tickets.add(aTicket.copyWith());
+      }
+    });
+    state = tickets;
   }
 
   void reorder(int oldIndex, int newIndex) {
@@ -50,6 +62,5 @@ class TicketNotifier extends StateNotifier<List<Ticket>> {
   }
 }
 
-final ticketListProvider =
-    StateNotifierProvider.autoDispose<TicketNotifier, List<Ticket>>(
-        (ref) => TicketNotifier());
+final ticketListProvider = StateNotifierProvider<TicketNotifier, List<Ticket>>(
+    (ref) => TicketNotifier());
