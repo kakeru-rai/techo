@@ -46,53 +46,60 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
         ticketState.body.isEmpty ? false : true;
   }
 
-  void _save(TextEditingController title, TextEditingController body) async {
-    Ticket ticketState = ref
-        .read(ticketProvider.notifier)
-        .state
-        .copyWith(title: title.text, body: body.text);
+  void _save(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) async {
+    Ticket ticketState = ref.read(ticketProvider.notifier).state.copyWith(
+        title: titleEditingController.text, body: bodyEditingController.text);
     await TicketRepository().upsert(ticketState);
     ref.read(ticketsProvider.notifier).update(ticketState);
   }
 
   void _setPreviewState(
-      bool isPreview, TextEditingController title, TextEditingController body) {
+      bool isPreview,
+      TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     Ticket ticketState = ref.read(ticketProvider.notifier).state;
-    ref.read(ticketProvider.notifier).state =
-        ticketState.copyWith(title: title.text, body: body.text);
+    ref.read(ticketProvider.notifier).state = ticketState.copyWith(
+        title: titleEditingController.text, body: bodyEditingController.text);
     ref.read(isPreviewProvider.notifier).state = isPreview;
   }
 
   void _setMdTextStateByMdTag(
-      MdTag tag, TextEditingController _bodyController) {
-    var mdTagger = MdTagger(_bodyController.text, tag,
-        _bodyController.selection.start, _bodyController.selection.start);
+      MdTag tag, TextEditingController bodyEditingController) {
+    var mdTagger = MdTagger(
+        bodyEditingController.text,
+        tag,
+        bodyEditingController.selection.start,
+        bodyEditingController.selection.start);
     var text = mdTagger.text;
-    _bodyController.text = text;
+    bodyEditingController.text = text;
     // ref.read(markdownProvider.notifier).state = text;
 
-    _bodyController.selection = TextSelection.fromPosition(
+    bodyEditingController.selection = TextSelection.fromPosition(
         TextPosition(offset: mdTagger.currentLineHeadPosition));
   }
 
-  void _pop(TextEditingController title, TextEditingController body) {
-    _save(title, body);
+  void _pop(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
+    _save(titleEditingController, bodyEditingController);
     Navigator.pop(context);
   }
 
   Future<bool> _onWillPop(
-      bool isPreview, TextEditingController title, TextEditingController body) {
+      bool isPreview,
+      TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     if (Navigator.of(context).userGestureInProgress) {
       // iosの戻るジェスチャー
-      _pop(title, body);
+      _pop(titleEditingController, bodyEditingController);
       return Future.value(false);
     }
     // iosの戻るジェスチャー意外 == Androidのバックキー
     if (isPreview) {
-      _pop(title, body);
+      _pop(titleEditingController, bodyEditingController);
       return Future.value(false);
     } else {
-      _setPreviewState(true, title, body);
+      _setPreviewState(true, titleEditingController, bodyEditingController);
       return Future.value(false);
     }
   }
@@ -105,13 +112,15 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
 
     Ticket ticketState = ref.watch(ticketProvider.notifier).state;
 
-    final _titleController_ = useTextEditingController(text: ticketState.title);
-    final _bodyController = TextEditingController(text: ticketState.body);
+    final titleEditingController =
+        useTextEditingController(text: ticketState.title);
+    final bodyEditingController = TextEditingController(text: ticketState.body);
 
     return WillPopScope(
       // ユーザー操作による「戻る」操作
       onWillPop: () {
-        return _onWillPop(isPreview, _titleController_, _bodyController);
+        return _onWillPop(
+            isPreview, titleEditingController, bodyEditingController);
       },
       child: Scaffold(
         appBar: AppBar(
@@ -119,11 +128,12 @@ class _DetailScreenState extends ConsumerState<DetailScreen> {
           leading: Builder(
             builder: (BuildContext context) {
               return _uiBuilder.appBarLeadingIconButton(
-                  _titleController_, _bodyController);
+                  titleEditingController, bodyEditingController);
             },
           ),
         ),
-        body: _uiBuilder.scaffoldBody(_titleController_, _bodyController),
+        body: _uiBuilder.scaffoldBody(
+            titleEditingController, bodyEditingController),
       ),
     );
   }
@@ -141,75 +151,84 @@ class _EditModeScreen extends DetailScreenUiBuilder {
   _EditModeScreen(this.parent);
 
   @override
-  Widget appBarLeadingIconButton(
-      TextEditingController title, TextEditingController body) {
+  Widget appBarLeadingIconButton(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     return IconButton(
       icon: const Icon(Icons.check),
       onPressed: () {
-        parent._setPreviewState(true, title, body);
+        parent._setPreviewState(
+            true, titleEditingController, bodyEditingController);
       },
     );
   }
 
   @override
-  Widget scaffoldBody(TextEditingController _titleController_,
-      TextEditingController bodyController) {
+  Widget scaffoldBody(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     return Container(
-        color: Colors.grey[100],
-        child: Column(children: [
-          Expanded(
-              child: SingleChildScrollView(
-                  child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
+      color: Colors.grey[100],
+      child: Column(children: [
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                    child: Container(
+                      color: Colors.white,
+                      child: TextField(
+                        controller: titleEditingController,
+                        decoration: const InputDecoration(
+                          hintText: 'タイトル',
+                        ),
+                      ),
+                    )),
+                Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
                   child: Container(
                     color: Colors.white,
-                    child: TextField(
-                      controller: _titleController_,
+                    child: TextFormField(
+                      controller: bodyEditingController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      // onChanged: parent._onBodyChanged,
                       decoration: const InputDecoration(
-                        hintText: 'タイトル',
+                        border: UnderlineInputBorder(),
+                        hintText: "本文",
                       ),
                     ),
-                  )),
-              Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                  child: Container(
-                      color: Colors.white,
-                      child: TextFormField(
-                        controller: bodyController,
-                        keyboardType: TextInputType.multiline,
-                        maxLines: null,
-                        // onChanged: parent._onBodyChanged,
-                        decoration: const InputDecoration(
-                          border: UnderlineInputBorder(),
-                          hintText: "本文",
-                        ),
-                      ))),
-            ],
-          ))),
-          Container(
-              decoration: const BoxDecoration(
-                color: Colors.white70,
-              ),
-              child: Row(children: [
-                OutlinedButton(
-                    child: const Text("見出し"),
-                    onPressed: (() {
-                      parent._setMdTextStateByMdTag(
-                          MdTag.header, bodyController);
-                    })),
-                OutlinedButton(
-                    child: const Text("箇条書き"),
-                    onPressed: (() {
-                      parent._setMdTextStateByMdTag(
-                          MdTag.unorderedList, bodyController);
-                    })),
-              ]))
-        ]));
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          decoration: const BoxDecoration(
+            color: Colors.white70,
+          ),
+          child: Row(children: [
+            OutlinedButton(
+              child: const Text("見出し"),
+              onPressed: (() {
+                parent._setMdTextStateByMdTag(
+                    MdTag.header, bodyEditingController);
+              }),
+            ),
+            OutlinedButton(
+              child: const Text("箇条書き"),
+              onPressed: (() {
+                parent._setMdTextStateByMdTag(
+                    MdTag.unorderedList, bodyEditingController);
+              }),
+            ),
+          ]),
+        )
+      ]),
+    );
   }
 }
 
@@ -218,34 +237,37 @@ class _PreviewModeScreen extends DetailScreenUiBuilder {
   _PreviewModeScreen(this.parent);
 
   @override
-  Widget appBarLeadingIconButton(TextEditingController _titleController_,
-      TextEditingController bodyController) {
+  Widget appBarLeadingIconButton(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     return IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
-        parent._pop(_titleController_, bodyController);
+        parent._pop(titleEditingController, bodyEditingController);
       },
     );
   }
 
   @override
-  Widget scaffoldBody(TextEditingController title, TextEditingController body) {
+  Widget scaffoldBody(TextEditingController titleEditingController,
+      TextEditingController bodyEditingController) {
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
         child: GestureDetector(
             onTap: () {
-              parent._setPreviewState(false, title, body);
+              parent._setPreviewState(
+                  false, titleEditingController, bodyEditingController);
             },
-            child: body.text.isEmpty
+            child: bodyEditingController.text.isEmpty
                 ? const Text("まだ何も入力されていません。タップして入力を開始。",
                     style: TextStyle(color: Colors.black26))
                 : Markdown(
-                    data: body.text,
+                    data: bodyEditingController.text,
                     selectable: true,
                     shrinkWrap: true,
                     softLineBreak: true,
                     onTapText: () {
-                      parent._setPreviewState(false, title, body);
+                      parent._setPreviewState(
+                          false, titleEditingController, bodyEditingController);
                     },
                   )));
   }

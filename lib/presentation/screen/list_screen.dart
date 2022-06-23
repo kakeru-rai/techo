@@ -101,121 +101,123 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     final _titleController = useTextEditingController();
 
     return GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text("メモ"),
-          ),
-          drawer: Drawer(
-            child: ListView(
-                // Important: Remove any padding from the ListView.
-                padding: EdgeInsets.zero,
-                children: [
-                  DrawerHeader(
-                    decoration: const BoxDecoration(
-                      color: Colors.white10,
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(
-                            loginUser.isAnonymous
-                                ? Icons.account_circle
-                                : Icons.face,
-                            size: 80.0),
-                        Text(loginUser.userName),
-                      ],
-                    ),
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text("メモ"),
+        ),
+        drawer: Drawer(
+          child: ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: [
+                DrawerHeader(
+                  decoration: const BoxDecoration(
+                    color: Colors.white10,
                   ),
-                  loginUser.isAnonymous
-                      ? SignInButton(
-                          Buttons.Google,
-                          onPressed: () {
-                            _onLoginTapped(context);
-                          },
-                        )
-                      : ListTile(
-                          leading: const Icon(Icons.logout),
-                          title: const Text('ログアウト'),
-                          onTap: () {
-                            _onLogoutTapped();
-                          }),
-                  ListTile(
-                      title: const Text('利用規約'),
-                      onTap: () async {
-                        WebViewScreenNavigation.pushTerm(context);
-                      }),
-                  ListTile(
-                      title: const Text('プライバシーポリシー'),
-                      onTap: () async {
-                        WebViewScreenNavigation.pushPrivacy(context);
-                      }),
-                  ListTile(
-                      title: const Text('初期化'),
-                      onTap: () async {
-                        await FirebaseAuthAdapter.signOut();
-                        Navigator.pushReplacementNamed(
-                            context, WelcomeScreen.routeName);
-                      }),
-                ]),
-          ),
-          body: Column(children: [
-            Expanded(
-              child: ReorderableListView(
-                children: <Widget>[
-                  for (int index = 0; index < tickets.length; ++index)
-                    ListTile(
-                      key: Key(tickets[index].id),
-                      onTap: () {
-                        _onListItemTapped(context, index);
-                      },
-                      title: Text(tickets[index].title),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
+                  child: Column(
+                    children: [
+                      Icon(
+                          loginUser.isAnonymous
+                              ? Icons.account_circle
+                              : Icons.face,
+                          size: 80.0),
+                      Text(loginUser.userName),
+                    ],
+                  ),
+                ),
+                loginUser.isAnonymous
+                    ? SignInButton(
+                        Buttons.Google,
                         onPressed: () {
-                          _onListItemDeleteTapped(tickets[index]);
+                          _onLoginTapped(context);
                         },
-                      ),
-                    )
-                ],
-                onReorder: _onReorder,
+                      )
+                    : ListTile(
+                        leading: const Icon(Icons.logout),
+                        title: const Text('ログアウト'),
+                        onTap: () {
+                          _onLogoutTapped();
+                        }),
+                ListTile(
+                    title: const Text('利用規約'),
+                    onTap: () async {
+                      WebViewScreenNavigation.pushTerm(context);
+                    }),
+                ListTile(
+                    title: const Text('プライバシーポリシー'),
+                    onTap: () async {
+                      WebViewScreenNavigation.pushPrivacy(context);
+                    }),
+                ListTile(
+                    title: const Text('初期化'),
+                    onTap: () async {
+                      await FirebaseAuthAdapter.signOut();
+                      Navigator.pushReplacementNamed(
+                          context, WelcomeScreen.routeName);
+                    }),
+              ]),
+        ),
+        body: Column(children: [
+          Expanded(
+            child: ReorderableListView(
+              children: <Widget>[
+                for (int index = 0; index < tickets.length; ++index)
+                  ListTile(
+                    key: Key(tickets[index].id),
+                    onTap: () {
+                      _onListItemTapped(context, index);
+                    },
+                    title: Text(tickets[index].title),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        _onListItemDeleteTapped(tickets[index]);
+                      },
+                    ),
+                  )
+              ],
+              onReorder: _onReorder,
+            ),
+          ),
+          Container(
+            // ボトム入力フォーム
+            color: Colors.grey[200],
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: Colors.white70,
+              ),
+              child: SizedBox(
+                height: 40,
+                child: Row(children: [
+                  Expanded(
+                      child: TextField(
+                    onEditingComplete: () =>
+                        {_onTicketAddTapped(_titleController)},
+                    autofocus: false,
+                    controller: _titleController,
+                    style: const TextStyle(fontSize: 14),
+                    decoration: const InputDecoration(
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      hintText: 'タイトル',
+                      hintStyle: TextStyle(fontSize: 14, color: Colors.black26),
+                      border: InputBorder.none,
+                    ),
+                  )),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () => {_onTicketAddTapped(_titleController)},
+                  )
+                ]),
               ),
             ),
-            Container(
-                // ボトム入力フォーム
-                color: Colors.grey[200],
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-                child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: Colors.white70,
-                    ),
-                    child: SizedBox(
-                        height: 40,
-                        child: Row(children: [
-                          Expanded(
-                              child: TextField(
-                            onEditingComplete: () =>
-                                {_onTicketAddTapped(_titleController)},
-                            autofocus: false,
-                            controller: _titleController,
-                            style: const TextStyle(fontSize: 14),
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 12),
-                              hintText: 'タイトル',
-                              hintStyle: TextStyle(
-                                  fontSize: 14, color: Colors.black26),
-                              border: InputBorder.none,
-                            ),
-                          )),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () =>
-                                {_onTicketAddTapped(_titleController)},
-                          )
-                        ]))))
-          ]),
-        ));
+          )
+        ]),
+      ),
+    );
   }
 }
 
