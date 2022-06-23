@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -10,6 +11,9 @@ import 'ticket_provider.dart';
 import 'webview_screen.dart';
 import 'welcome_screen.dart';
 
+final loginUserProvider =
+    StateProvider<LoginUser>((ref) => LoginUser("", true));
+
 class ListScreen extends StatefulHookConsumerWidget {
   static const routeName = "ListScreen";
 
@@ -20,19 +24,17 @@ class ListScreen extends StatefulHookConsumerWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  LoginUser _loginUser =
-      LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
+  // LoginUser _loginUser =
+  //     LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
   late TextEditingController _titleController;
 
   @override
   void initState() {
     super.initState();
-
+    _setLoginUserState(FirebaseAuthAdapter.getUser()!);
     _titleController = TextEditingController();
     Future(() async {
-      ref
-          .read(ticketListProvider.notifier)
-          .setList(await TicketRepository().getList());
+      await _fetchTickets();
     });
   }
 
@@ -68,7 +70,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     ref.read(ticketListProvider.notifier).delete(ticket);
     _updateSort(ref.read(ticketListProvider));
 
-    _setStateInitView();
+    _setLoginUserState(FirebaseAuthAdapter.getUser()!);
   }
 
   void _onReorder(int oldIndex, int newIndex) {
@@ -79,24 +81,34 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   void _onLogoutTapped() async {
     await FirebaseAuthAdapter.signOut();
     await FirebaseAuthAdapter.signInWithAnonymous();
-    _setStateInitView();
+    _fetchTickets();
+    _setLoginUserState(FirebaseAuthAdapter.getUser()!);
   }
 
   void _onLoginTapped(BuildContext context) async {
     bool isLoginSucceeded = await FirebaseAuthAdapter.signInWithGoogle();
     if (isLoginSucceeded) {
-      Navigator.pop(context);
-      _setStateInitView();
+      Navigator.pop(context); // ドロワーを閉じる
+      _fetchTickets();
+      _setLoginUserState(FirebaseAuthAdapter.getUser()!);
     }
   }
 
-  Future<void> _setStateInitView() async {
-    _loginUser = LoginUser.fromFirebaseUser(FirebaseAuthAdapter.getUser()!);
+  Future<void> _setLoginUserState(User user) async {
+    ref.read(loginUserProvider.notifier).state =
+        LoginUser.fromFirebaseUser(user);
+  }
+
+  Future<void> _fetchTickets() async {
+    ref
+        .read(ticketListProvider.notifier)
+        .setList(await TicketRepository().getList());
   }
 
   @override
   Widget build(BuildContext context) {
     final _items = ref.watch<List<Ticket>>(ticketListProvider);
+    final loginUser = ref.watch(loginUserProvider);
 
     return GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
@@ -116,15 +128,15 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                     child: Column(
                       children: [
                         Icon(
-                            _loginUser.isAnonymous
+                            loginUser.isAnonymous
                                 ? Icons.account_circle
                                 : Icons.face,
                             size: 80.0),
-                        Text(_loginUser.userName),
+                        Text(loginUser.userName),
                       ],
                     ),
                   ),
-                  _loginUser.isAnonymous
+                  loginUser.isAnonymous
                       ? SignInButton(
                           Buttons.Google,
                           onPressed: () {
