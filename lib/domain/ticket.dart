@@ -1,47 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class Ticket {
-  final String id;
+part 'ticket.freezed.dart';
+part 'ticket.g.dart';
 
-  final String title;
+@freezed
+class Ticket with _$Ticket {
+  const factory Ticket({
+    required String id,
+    required String title,
+    required String body,
+    required int sort,
+  }) = _Ticket;
 
-  final String body;
-
-  final int sort;
-
-  Ticket(
-      {required this.id,
-      required this.title,
-      required this.body,
-      required this.sort});
-
-  Ticket.nullTicket()
-      : id = "",
-        title = "",
-        body = "",
-        sort = 0;
-
-  @override
-  String toString() {
-    return "$id:$title:$body";
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "title": title,
-      "body": body,
-      "sort": sort,
-    };
-  }
-
-  Ticket copyWith({String? id, String? title, String? body, int? sort}) {
-    return Ticket(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      body: body ?? this.body,
-      sort: sort ?? this.sort,
-    );
-  }
+  factory Ticket.fromJson(Map<String, Object?> json) => _$TicketFromJson(json);
 
   static Ticket fromFirestoreSnapshot(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {

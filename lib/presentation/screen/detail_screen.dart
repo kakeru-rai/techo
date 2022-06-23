@@ -30,7 +30,7 @@ final isPreviewProvider = StateProvider.autoDispose<bool>((ref) {
 });
 
 final ticketProvider = StateProvider.autoDispose<Ticket>((ref) {
-  return Ticket.nullTicket();
+  return const Ticket(id: "", title: "", body: "", sort: 0);
 });
 
 class _DetailScreenState extends ConsumerState<DetailScreen> {
