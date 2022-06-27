@@ -1,32 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class Ticket {
-  String id;
+part 'ticket.freezed.dart';
+part 'ticket.g.dart';
 
-  String title;
+@freezed
+class Ticket with _$Ticket {
+  const factory Ticket({
+    required String id,
+    required String title,
+    required String body,
+    required int sort,
+  }) = _Ticket;
 
-  String body;
-
-  int sort = 0;
-
-  Ticket(this.id, this.title, this.body, this.sort);
-
-  @override
-  String toString() {
-    return "$id:$title:$body";
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      "title": title,
-      "body": body,
-      "sort": sort,
-    };
-  }
+  factory Ticket.fromJson(Map<String, Object?> json) => _$TicketFromJson(json);
 
   static Ticket fromFirestoreSnapshot(
       DocumentSnapshot<Map<String, dynamic>> snapshot) {
-    return Ticket(snapshot.id, snapshot.get("title"), snapshot.get("body"),
-        snapshot.data()!.containsKey("sort") ? snapshot.get("sort") : 0);
+    return Ticket(
+        id: snapshot.id,
+        title: snapshot.get("title"),
+        body: snapshot.get("body"),
+        sort: snapshot.data()!.containsKey("sort") ? snapshot.get("sort") : 0);
   }
 }

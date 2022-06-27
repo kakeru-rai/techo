@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'my_app.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -10,5 +11,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp(FirebaseAuth.instance.currentUser != null));
+  runApp(
+      ProviderScope(child: MyApp(FirebaseAuth.instance.currentUser != null)));
 }
